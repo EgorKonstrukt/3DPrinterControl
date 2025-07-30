@@ -1,0 +1,58 @@
+{
+    "printer": {
+        "build_volume": {
+            "x": 220,
+            "y": 220,
+            "z": 250
+        },
+        "max_feedrate": {
+            "x": 500,
+            "y": 500,
+            "z": 5,
+            "e": 25
+        },
+        "max_acceleration": {
+            "x": 3000,
+            "y": 3000,
+            "z": 100,
+            "e": 10000
+        },
+        "default_temperatures": {
+            "extruder": 200,
+            "bed": 60
+        }
+    },
+    "serial": {
+        "port": "AUTO",
+        "baudrate": 115200,
+        "timeout": 1.0,
+        "auto_connect": false
+    },
+    "ui": {
+        "theme": "light",
+        "language": "ru",
+        "show_grid": true,
+        "show_axes": true,
+        "show_build_plate": true,
+        "lighting_enabled": true,
+        "smooth_movement": true,
+        "auto_scroll_console": true,
+        "console_max_lines": 1000,
+        "visualization_quality": "high"
+    },
+    "gcode": {
+        "auto_load_preview": true,
+        "show_toolpath": true,
+        "animation_speed": 1.0,
+        "highlight_current_line": true
+    },
+    "calibration": {
+        "bed_leveling_points": 9,
+        "probe_offset": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -1.5
+        },
+        "z_probe_speed": 5
+    }
+}
