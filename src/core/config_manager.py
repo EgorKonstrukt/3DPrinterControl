@@ -25,7 +25,7 @@ class ConfigManager(QObject):
                 "port": "AUTO",
                 "baudrate": 115200,
                 "timeout": 1.0,
-                "auto_connect": False
+                "auto_connect": True
             },
             "ui": {
                 "theme": "dark",
