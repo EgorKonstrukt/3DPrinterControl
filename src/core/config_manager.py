@@ -2,6 +2,7 @@ import json
 import os
 from typing import Any, Dict
 from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QByteArray
 
 
 class ConfigManager(QObject):
@@ -110,11 +111,11 @@ class ConfigManager(QObject):
     def get_section(self, section: str) -> Dict[str, Any]:
         return self.config_data.get(section, {})
 
-    def save_layout(self, geometry: bytes, state: bytes) -> bool:
+    def save_layout(self, geometry: QByteArray, state: QByteArray) -> bool:
         try:
             layout_data = {
-                'geometry': geometry.hex(),
-                'state': state.hex()
+                'geometry': bytes(geometry).hex(),
+                'state': bytes(state).hex()
             }
             with open(self.layout_file, 'w', encoding='utf-8') as f:
                 json.dump(layout_data, f)
@@ -128,8 +129,8 @@ class ConfigManager(QObject):
             if os.path.exists(self.layout_file):
                 with open(self.layout_file, 'r', encoding='utf-8') as f:
                     layout_data = json.load(f)
-                    geometry = bytes.fromhex(layout_data['geometry'])
-                    state = bytes.fromhex(layout_data['state'])
+                    geometry = QByteArray.fromHex(layout_data['geometry'].encode())
+                    state = QByteArray.fromHex(layout_data['state'].encode())
                     return geometry, state
         except Exception as e:
             print(f"Error loading layout: {e}")
