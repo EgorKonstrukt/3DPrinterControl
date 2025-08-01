@@ -11,7 +11,7 @@ from core.config_manager import ConfigManager
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("3D Printer Control")
-    app.setApplicationVersion("2.1")
+    app.setApplicationVersion("2.2")
     app.setOrganizationName("LayDigital")
     app.setOrganizationDomain("LayDigital.local")
     

@@ -1,9 +1,9 @@
 {
     "printer": {
         "build_volume": {
-            "x": 220,
-            "y": 220,
-            "z": 250
+            "x": 225,
+            "y": 225,
+            "z": 350
         },
         "max_feedrate": {
             "x": 500,
@@ -50,8 +50,8 @@
     "calibration": {
         "bed_leveling_points": 9,
         "probe_offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": -1.5
         },
         "z_probe_speed": 5
