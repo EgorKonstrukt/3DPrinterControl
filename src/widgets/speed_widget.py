@@ -3,9 +3,10 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
 
 
 class SpeedWidget(QWidget):
-    def __init__(self, gcode_handler):
+    def __init__(self, gcode_handler, localization_manager):
         super().__init__()
         self.gcode_handler = gcode_handler
+        self.localization_manager = localization_manager
         self.init_ui()
         self.init_values()
         self.connect_signals()

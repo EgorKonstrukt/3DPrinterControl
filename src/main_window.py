@@ -8,6 +8,7 @@ from PyQt6.QtGui import QAction, QKeySequence
 from core.serial_comm import SerialComm
 from core.gcode_handler import GCodeHandler
 from widgets.visualization_3d import Advanced3DVisualizationWidget
+from widgets.temperature_widget import TemperatureWidget
 from widgets.printer_control import PrinterControl
 from widgets.console import ConsoleWidget
 from widgets.gcode_viewer import GCodeViewer
@@ -18,12 +19,14 @@ from ui.menu_manager import MenuManager
 from ui.toolbar_manager import ToolbarManager
 from ui.status_manager import StatusManager
 from ui.theme_manager import ThemeManager
+from localization.localization_manager import LocalizationManager
 
 
 class MainWindow(QMainWindow):
     def __init__(self, config_manager):
         super().__init__()
         self.config_manager = config_manager
+        self.localization_manager = LocalizationManager(self.config_manager)
 
         self._init_core_components()
         self._init_ui()
@@ -33,13 +36,11 @@ class MainWindow(QMainWindow):
         self._start_status_timer()
 
     def _init_core_components(self):
-        """Инициализация основных компонентов"""
         self.serial_comm = SerialComm()
         self.gcode_handler = GCodeHandler(self.serial_comm)
 
     def _init_ui(self):
-        """Инициализация пользовательского интерфейса"""
-        self.setWindowTitle("3D Printer Control - Улучшенная версия")
+        self.setWindowTitle(self.localization_manager.tr("app_title"))
         self.setMinimumSize(1400, 1000)
 
         self._create_central_widget()
@@ -47,47 +48,56 @@ class MainWindow(QMainWindow):
         self._setup_dock_options()
 
     def _create_central_widget(self):
+        """Создание центрального виджета с улучшенной 3D визуализацией"""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
         main_layout = QHBoxLayout()
         central_widget.setLayout(main_layout)
 
+        # Основной сплиттер
         main_splitter = QSplitter(Qt.Orientation.Horizontal)
         main_layout.addWidget(main_splitter)
 
+        # Улучшенная 3D визуализация
         self.visualization_3d = Advanced3DVisualizationWidget(self.config_manager)
         main_splitter.addWidget(self.visualization_3d)
 
+        # Установка размеров
         main_splitter.setSizes([1000, 400])
 
     def _create_dock_widgets(self):
         """Создание док-виджетов"""
-        self.printer_control_dock = QDockWidget("Управление принтером", self)
-        self.printer_control_widget = PrinterControl(self.gcode_handler)
+        # Управление принтером
+        self.printer_control_dock = QDockWidget(self.localization_manager.tr("printer_control"), self)
+        self.printer_control_widget = PrinterControl(gcode_handler=self.gcode_handler,
+                                                     localization_manager=self.localization_manager,
+                                                     config_manager=self.config_manager)
         self.printer_control_dock.setWidget(self.printer_control_widget)
         self._setup_dock_features(self.printer_control_dock)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.printer_control_dock)
 
-        self.gcode_dock = QDockWidget("G-код", self)
+        self.gcode_dock = QDockWidget(self.localization_manager.tr("gcode_viewer"), self)
         self.gcode_widget = GCodeViewer(self.gcode_handler)
         self.gcode_dock.setWidget(self.gcode_widget)
         self._setup_dock_features(self.gcode_dock)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.gcode_dock)
 
-        self.console_dock = QDockWidget("Консоль", self)
+
+        self.console_dock = QDockWidget(self.localization_manager.tr("console"), self)
         self.console_widget = ConsoleWidget(self.serial_comm)
         self.console_dock.setWidget(self.console_widget)
         self._setup_dock_features(self.console_dock)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.console_dock)
 
+
     def _setup_dock_features(self, dock):
-        """Настройка возможностей док-виджета"""
-        dock.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetMovable |
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable |
-            QDockWidget.DockWidgetFeature.DockWidgetClosable
-        )
+            """Настройка возможностей док-виджета"""
+            dock.setFeatures(
+                QDockWidget.DockWidgetFeature.DockWidgetMovable |
+                QDockWidget.DockWidgetFeature.DockWidgetFloatable |
+                QDockWidget.DockWidgetFeature.DockWidgetClosable
+            )
 
     def _setup_dock_options(self):
         """Настройка опций док-виджетов"""
@@ -110,14 +120,17 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self):
         """Подключение сигналов"""
+        # Связь между управлением принтером и 3D визуализацией
         self.printer_control_widget.position_changed.connect(
             self.visualization_3d.update_position
         )
 
+        # Связь между 3D визуализацией и управлением принтером
         self.visualization_3d.position_clicked.connect(
             self._on_3d_position_clicked
         )
 
+        # Связь между G-code обработчиком и статус-баром
         self.gcode_handler.position_changed.connect(
             self.status_manager.update_position_display
         )
@@ -128,6 +141,7 @@ class MainWindow(QMainWindow):
             self.status_manager.update_print_status
         )
 
+        # Связь между G-code обработчиком и 3D визуализацией
         self.gcode_handler.gcode_loaded.connect(
             self.visualization_3d.load_gcode_path
         )
@@ -135,14 +149,17 @@ class MainWindow(QMainWindow):
             self.visualization_3d.update_position
         )
 
+        # Связь между G-code просмотрщиком и 3D визуализацией
         self.gcode_widget.layer_selected.connect(
             self.visualization_3d.visualization.set_current_layer
         )
 
+        # Связь с последовательным соединением
         self.serial_comm.connection_changed.connect(
             self.status_manager.update_connection_status
         )
 
+        # Связь с конфигурацией
         self.config_manager.config_changed.connect(self._on_config_changed)
 
     def _start_status_timer(self):
@@ -165,13 +182,13 @@ class MainWindow(QMainWindow):
         """Загрузка G-code файла"""
         filename, _ = QFileDialog.getOpenFileName(
             self,
-            "Загрузить G-код файл",
+            self.localization_manager.tr("file_load_gcode"),
             "",
             "G-code Files (*.gcode *.g *.nc);;All Files (*)"
         )
         if filename:
             self.gcode_widget.load_gcode_file(filename)
-            self.status_manager.show_message(f"Загружен файл: {os.path.basename(filename)}")
+            self.status_manager.show_message(f"{self.localization_manager.tr("message_gcode_loaded")} {os.path.basename(filename)}")
 
     def start_print(self):
         """Начало печати"""
@@ -189,15 +206,13 @@ class MainWindow(QMainWindow):
             self.printer_control_widget.disconnect_printer()
 
     def quick_home(self):
-        """Быстрый возврат в исходное положение"""
         self.gcode_handler.home_all()
-        self.status_manager.show_message("Выполняется HOME всех осей...")
+        self.status_manager.show_message(self.localization_manager.tr("status_home_all"))
 
     def emergency_stop(self):
-        """Аварийная остановка"""
         self.gcode_handler.send_command("M112")
-        self.status_manager.show_message("АВАРИЙНАЯ ОСТАНОВКА!")
-        QMessageBox.critical(self, "Аварийная остановка", "Принтер остановлен аварийно!")
+        self.status_manager.show_message(self.localization_manager.tr("status_emergency_stop"))
+        QMessageBox.critical(self, self.localization_manager.tr("status_emergency_stop"), self.localization_manager.tr("message_emergency_stop_critical"))
 
     def open_calibration(self):
         """Открытие диалога калибровки"""
@@ -228,40 +243,35 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.gcode_dock)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.console_dock)
 
-        for dock in [self.printer_control_dock, self.gcode_dock, self.console_dock]:
+        for dock in [self.printer_control_dock, self.gcode_dock, self.console_dock, self.temperature_dock]:
             dock.show()
 
     def reset_3d_view(self):
-        """Сброс 3D вида"""
         self.visualization_3d.visualization.reset_camera()
-        self.status_manager.show_message("3D вид сброшен")
+        self.status_manager.show_message(self.localization_manager.tr("status_3d_view_reset"))
 
     def toggle_grid(self):
-        """Переключение сетки"""
         self.visualization_3d.visualization.toggle_grid()
 
     def toggle_axes(self):
-        """Переключение осей"""
         self.visualization_3d.visualization.toggle_axes()
 
     def toggle_build_plate(self):
-        """Переключение платформы"""
         self.visualization_3d.visualization.toggle_build_plate()
 
     def toggle_lighting(self):
-        """Переключение освещения"""
         self.visualization_3d.visualization.toggle_lighting()
 
     def clear_trail(self):
-        """Очистка следа печатной головки"""
         self.visualization_3d.clear_trail()
-        self.status_manager.show_message("След печатной головки очищен")
+        self.status_manager.show_message(self.localization_manager.tr("view_3d_clear_trail"))
 
     def _apply_settings(self):
         """Применение настроек"""
         theme = self.config_manager.get('ui.theme', 'dark')
         self.theme_manager.apply_theme(theme)
 
+        # Обновление размеров области печати
         build_volume = self.config_manager.get('printer.build_volume')
         if build_volume:
             self.visualization_3d.visualization.set_build_volume(
@@ -280,38 +290,25 @@ class MainWindow(QMainWindow):
         self._apply_settings()
 
     def save_settings(self):
-        """Сохранение настроек"""
         self.config_manager.save_layout(self.saveGeometry(), self.saveState())
         self.config_manager.save_config()
-        self.status_manager.show_message("Настройки сохранены")
+        self.status_manager.show_message(self.localization_manager.tr("message_settings_saved"))
 
     def show_about(self):
-        """Показать информацию о программе"""
         QMessageBox.about(
             self,
-            "О программе",
-            """
-            <h3>3D Printer Control - Улучшенная версия</h3>
-            <p>Полноценное управление 3D принтером с улучшенной визуализацией G-code</p>
-            <p><b>Управление камерой:</b></p>
-            <ul>
-                <li>Правая кнопка мыши - вращение</li>
-                <li>Средняя кнопка мыши - панорамирование</li>
-                <li>Колесо мыши - масштабирование</li>
-                <li>Ctrl + левая кнопка - установка позиции</li>
-            </ul>
-            """
+            self.localization_manager.tr("about_title"),
+            self.localization_manager.tr("about_content")
         )
 
     def closeEvent(self, event):
-        """Обработка закрытия окна"""
         self.save_settings()
 
         if self.serial_comm.is_connected:
             reply = QMessageBox.question(
                 self,
-                "Подтверждение выхода",
-                "Принтер подключен. Отключить и выйти?",
+                self.localization_manager.tr("message_confirm_exit_connected"),
+                self.localization_manager.tr("message_confirm_exit_connected"),
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No
             )
@@ -323,4 +320,3 @@ class MainWindow(QMainWindow):
                 event.ignore()
         else:
             event.accept()
-

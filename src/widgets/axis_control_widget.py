@@ -6,9 +6,10 @@ from PyQt6.QtCore import pyqtSignal
 class AxisControlWidget(QWidget):
     position_changed = pyqtSignal(float, float, float)
 
-    def __init__(self, gcode_handler):
+    def __init__(self, gcode_handler, localization_manager):
         super().__init__()
         self.gcode_handler = gcode_handler
+        self.localization_manager = localization_manager
         self.current_pos = [0.0, 0.0, 0.0]
         self.step_sizes = [0.1, 1.0, 10.0, 50.0]
         self.current_step_index = 1

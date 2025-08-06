@@ -6,9 +6,10 @@ from PyQt6.QtCore import pyqtSignal
 class ConnectionWidget(QWidget):
     connection_changed = pyqtSignal(bool)
 
-    def __init__(self, gcode_handler):
+    def __init__(self, gcode_handler, localization_manager):
         super().__init__()
         self.gcode_handler = gcode_handler
+        self.localization_manager = localization_manager
         self.init_ui()
         self.connect_signals()
 

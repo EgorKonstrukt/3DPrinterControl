@@ -345,7 +345,6 @@ class GCodeAnalyzer:
         self.path_data = []
 
     def analyze_gcode(self, gcode_lines):
-        """Анализ G-code с правильными осями и поддержкой слоев"""
         self.reset()
         self.total_lines = len(gcode_lines)
 
