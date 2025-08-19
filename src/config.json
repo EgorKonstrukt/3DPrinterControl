@@ -30,7 +30,7 @@
     },
     "ui": {
         "theme": "dark",
-        "language": "ru",
+        "language": "en",
         "show_grid": true,
         "show_axes": true,
         "show_build_plate": true,

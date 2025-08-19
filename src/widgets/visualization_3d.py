@@ -15,9 +15,10 @@ class Advanced3DVisualization(QOpenGLWidget):
     position_clicked = pyqtSignal(float, float, float)
     layer_changed = pyqtSignal(int)
 
-    def __init__(self, config_manager):
+    def __init__(self, config_manager, localization_manager):
         super().__init__()
         self.config_manager = config_manager
+        self.localization_manager = localization_manager
 
         self.print_head_pos = [0.0, 0.0, 0.0]  # [X, Y, Z]
 
@@ -429,13 +430,13 @@ class Advanced3DVisualization(QOpenGLWidget):
         rot_y = self.camera_rotation_y
 
         lines = [
-            f"Позиция X: {x:.1f} мм",
-            f"Позиция Y: {y:.1f} мм",
-            f"Позиция Z: {z:.1f} мм",
-            f"Камера: {distance:.0f} мм",
-            f"Поворот X: {rot_x:.1f}°",
-            f"Поворот Y: {rot_y:.1f}°",
-            f"Слой: {self.current_layer} / {self.max_layer}"
+            self.localization_manager.tr("view_3d_position_x_float")+f"{x:.1f}"+self.localization_manager.tr("view_3d_mm"),
+            self.localization_manager.tr("view_3d_position_y_float")+f"{y:.1f}"+self.localization_manager.tr("view_3d_mm"),
+            self.localization_manager.tr("view_3d_position_z_float")+f"{z:.1f}"+self.localization_manager.tr("view_3d_mm"),
+            self.localization_manager.tr("view_3d_camera_float")+f"{distance:.0f}"+self.localization_manager.tr("view_3d_mm"),
+            self.localization_manager.tr("view_3d_rotation_x_float")+f"{rot_x:.1f}°",
+            self.localization_manager.tr("view_3d_rotation_y_float")+f"{rot_y:.1f}°",
+            self.localization_manager.tr("view_3d_layer_group_layer_label")+f"{self.current_layer} / {self.max_layer}"
         ]
 
         margin = 10
@@ -515,7 +516,7 @@ class Advanced3DVisualization(QOpenGLWidget):
         if event.buttons() & Qt.MouseButton.RightButton:
             # Вращение камеры
             self.camera_rotation_y += dx * self.mouse_sensitivity
-            self.camera_rotation_x -= dy * self.mouse_sensitivity  # Исправлено направление
+            self.camera_rotation_x += dy * self.mouse_sensitivity
 
             # Ограничение углов
             self.camera_rotation_x = max(-89, min(89, self.camera_rotation_x))
@@ -526,12 +527,11 @@ class Advanced3DVisualization(QOpenGLWidget):
             # Панорамирование
             move_speed = self.camera_distance * 0.001
 
-            # Исправленное панорамирование с учетом поворота камеры
             rad_y = math.radians(self.camera_rotation_y)
 
             # Движение в плоскости XY
-            self.camera_target[0] -= (dx * math.cos(rad_y) + dy * math.sin(rad_y)) * move_speed
-            self.camera_target[1] -= (-dx * math.sin(rad_y) + dy * math.cos(rad_y)) * move_speed
+            self.camera_target[0] += (dx * math.cos(rad_y) + dy * math.sin(rad_y)) * move_speed
+            self.camera_target[1] += (-dx * math.sin(rad_y) + dy * math.cos(rad_y)) * move_speed
 
             self.update()
 
@@ -617,7 +617,6 @@ class Advanced3DVisualization(QOpenGLWidget):
 
 
 class Advanced3DVisualizationWidget(QWidget):
-    """Виджет с 3D визуализацией и элементами управления как в Simplify3D"""
     position_clicked = pyqtSignal(float, float, float)
 
     def __init__(self, config_manager, localization_manager):
@@ -635,7 +634,7 @@ class Advanced3DVisualizationWidget(QWidget):
         main_layout.addWidget(splitter)
 
         # 3D визуализация
-        self.visualization = Advanced3DVisualization(self.config_manager)
+        self.visualization = Advanced3DVisualization(self.config_manager, self.localization_manager)
         splitter.addWidget(self.visualization)
 
         # Панель управления
@@ -650,7 +649,6 @@ class Advanced3DVisualizationWidget(QWidget):
         self.visualization.layer_changed.connect(self.on_layer_changed)
 
     def create_control_panel(self):
-        """Создание панели управления как в Simplify3D"""
         panel = QWidget()
         panel.setMaximumWidth(300)
         panel.setMinimumWidth(250)
@@ -757,27 +755,33 @@ class Advanced3DVisualizationWidget(QWidget):
         layout.addWidget(layer_group)
 
         # Группа управления камерой
-        camera_group = QGroupBox("Управление камерой")
+        camera_group = QGroupBox(self.localization_manager.tr(""))
         camera_layout = QGridLayout()
         camera_group.setLayout(camera_layout)
 
         # Кнопки предустановленных видов
-        self.view_front_btn = QPushButton("Спереди")
+        self.view_front_btn = QPushButton(
+            self.localization_manager.tr("view_3d_camera_group_layer_view_front_btn"))
         self.view_front_btn.clicked.connect(self.view_front)
 
-        self.view_back_btn = QPushButton("Сзади")
+        self.view_back_btn = QPushButton(
+            self.localization_manager.tr("view_3d_camera_group_layer_view_back_btn"))
         self.view_back_btn.clicked.connect(self.view_back)
 
-        self.view_left_btn = QPushButton("Слева")
+        self.view_left_btn = QPushButton(
+            self.localization_manager.tr("view_3d_camera_group_layer_view_left_btn"))
         self.view_left_btn.clicked.connect(self.view_left)
 
-        self.view_right_btn = QPushButton("Справа")
+        self.view_right_btn = QPushButton(
+            self.localization_manager.tr("view_3d_camera_group_layer_view_right_btn"))
         self.view_right_btn.clicked.connect(self.view_right)
 
-        self.view_top_btn = QPushButton("Сверху")
+        self.view_top_btn = QPushButton(
+            self.localization_manager.tr("view_3d_camera_group_layer_view_top_btn"))
         self.view_top_btn.clicked.connect(self.view_top)
 
-        self.view_bottom_btn = QPushButton("Снизу")
+        self.view_bottom_btn = QPushButton(
+            self.localization_manager.tr("view_3d_camera_group_layer_view_bottom_btn"))
         self.view_bottom_btn.clicked.connect(self.view_bottom)
 
         camera_layout.addWidget(self.view_front_btn, 0, 0)
@@ -788,18 +792,19 @@ class Advanced3DVisualizationWidget(QWidget):
         camera_layout.addWidget(self.view_bottom_btn, 2, 1)
 
         # Кнопка сброса камеры
-        self.reset_camera_btn = QPushButton("Сбросить вид")
+        self.reset_camera_btn = QPushButton(
+            self.localization_manager.tr("view_3d_camera_group_layer_reset_camera_btn"))
         self.reset_camera_btn.clicked.connect(self.visualization.reset_camera)
         camera_layout.addWidget(self.reset_camera_btn, 3, 0, 1, 2)
 
         layout.addWidget(camera_group)
 
         # Группа информации
-        info_group = QGroupBox("Информация")
+        info_group = QGroupBox(self.localization_manager.tr("view_3d_info_group_title"))
         info_layout = QVBoxLayout()
         info_group.setLayout(info_layout)
 
-        self.info_label = QLabel("Загрузите G-code файл для просмотра")
+        self.info_label = QLabel(self.localization_manager.tr("view_3d_info_group_info_label"))
         self.info_label.setWordWrap(True)
         info_layout.addWidget(self.info_label)
 
@@ -811,7 +816,7 @@ class Advanced3DVisualizationWidget(QWidget):
 
     def on_layer_changed(self, layer):
         """Обработка изменения слоя"""
-        self.layer_label.setText(f"Слой: {layer} / {self.visualization.max_layer}")
+        self.layer_label.setText(self.localization_manager.tr("view_3d_layer_group_layer_label")+ f"{layer} / {self.visualization.max_layer}")
         self.layer_slider.setValue(layer)
 
     def prev_layer(self):
@@ -882,9 +887,11 @@ class Advanced3DVisualizationWidget(QWidget):
         if layers_data:
             layer_count = len(layers_data)
             self.layer_slider.setRange(0, layer_count - 1)
-            self.info_label.setText(f"Загружено слоев: {layer_count}")
+            self.info_label.setText(
+                self.localization_manager.tr("view_3d_load_gcode_info_label")+f"{layer_count}")
         else:
-            self.info_label.setText("G-code загружен")
+            self.info_label.setText(
+                self.localization_manager.tr("view_3d_load_gcode_info_label_succes"))
 
     def clear_trail(self):
         """Очистка следа печатной головки"""

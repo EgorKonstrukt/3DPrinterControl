@@ -5,6 +5,7 @@
     "console": "Консоль",
     "file_menu": "Файл",
     "file_load_gcode": "Загрузить G-код",
+    "file_save_settings": "Загрузить G-код",
     "file_exit": "Выход",
     "control_menu": "Управление",
     "control_connect": "Подключить",
@@ -14,6 +15,20 @@
     "view_menu": "Вид",
     "view_reset_layout": "Сбросить расположение",
     "view_fullscreen": "Полный экран",
+    "view_theme": "Тема",
+
+    "theme_menu_dark": "Темная",
+    "theme_menu_light": "Светлая",
+
+    "tools_menu_tools": "Инструменты",
+    "tools_menu_calibration": "Калибровка",
+    "tools_menu_macros": "Макросы",
+    "tools_menu_emergency": "Аварийная остановка",
+    "tools_menu_settings": "Настройки",
+
+    "help_menu_help": "Справка",
+    "help_menu_about": "О программе",
+    "help_menu_hotkeys": "Горячие клавиши",
 
     "view_3d_control_title": "Управление видом",
     "view_3d_reset": "Сбросить 3D вид",
@@ -22,6 +37,7 @@
     "view_3d_build_plate": "Платформа",
     "view_3d_lighting": "Освещение",
     "view_3d_clear_trail": "Очистить след головки",
+
     "view_3d_gcode_group_title": "G-code визуализация",
     "view_3d_gcode_group_print": "Печать",
     "view_3d_gcode_group_print_moves": "Перемещения печати",
@@ -30,6 +46,29 @@
 
     "view_3d_layer_group_title": "Управление слоями",
     "view_3d_layer_group_layer_label": "Слой: ",
+
+    "view_3d_camera_group_layer_label": "Управление камерой",
+    "view_3d_camera_group_layer_view_front_btn": "Спереди",
+    "view_3d_camera_group_layer_view_back_btn": "Сзади",
+    "view_3d_camera_group_layer_view_left_btn": "Слева",
+    "view_3d_camera_group_layer_view_right_btn": "Справа",
+    "view_3d_camera_group_layer_view_top_btn": "Сверху",
+    "view_3d_camera_group_layer_view_bottom_btn": "Снизу",
+    "view_3d_camera_group_layer_reset_camera_btn": "Сбросить вид",
+
+    "view_3d_load_gcode_info_label": "Загружено слоев: ",
+    "view_3d_load_gcode_info_label_succes": "G-code загружен",
+
+    "view_3d_mm": " мм",
+    "view_3d_position_x_float": "Позиция X: ",
+    "view_3d_position_y_float": "Позиция Y: ",
+    "view_3d_position_z_float": "Позиция Z: ",
+    "view_3d_camera_float": "Камера: ",
+    "view_3d_rotation_x_float": "Поворот X: ",
+    "view_3d_rotation_y_float": "Поворот Y: ",
+
+    "view_3d_info_group_title": "Сбросить вид",
+    "view_3d_info_group_info_label": "Загрузите G-code файл для просмотра",
 
     "tools_menu": "Инструменты",
     "tools_calibration": "Калибровка",

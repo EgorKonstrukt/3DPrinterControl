@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
 
     def _init_managers(self):
         """Инициализация менеджеров"""
-        self.menu_manager = MenuManager(self)
+        self.menu_manager = MenuManager(self, localization_manager=self.localization_manager)
         self.toolbar_manager = ToolbarManager(self)
         self.status_manager = StatusManager(self)
         self.theme_manager = ThemeManager(self.config_manager)
