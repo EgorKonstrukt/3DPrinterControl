@@ -620,8 +620,9 @@ class Advanced3DVisualizationWidget(QWidget):
     """Виджет с 3D визуализацией и элементами управления как в Simplify3D"""
     position_clicked = pyqtSignal(float, float, float)
 
-    def __init__(self, config_manager):
+    def __init__(self, config_manager, localization_manager):
         self.config_manager = config_manager
+        self.localization_manager = localization_manager
         super().__init__()
         self.init_ui()
 
@@ -658,24 +659,24 @@ class Advanced3DVisualizationWidget(QWidget):
         panel.setLayout(layout)
 
         # Группа управления видом
-        view_group = QGroupBox("Управление видом")
+        view_group = QGroupBox(self.localization_manager.tr("view_3d_control_title"))
         view_layout = QGridLayout()
         view_group.setLayout(view_layout)
 
         # Чекбоксы для отображения элементов
-        self.grid_checkbox = QCheckBox("Сетка")
+        self.grid_checkbox = QCheckBox(self.localization_manager.tr("view_3d_grid"))
         self.grid_checkbox.setChecked(self.visualization.grid_enabled)
         self.grid_checkbox.toggled.connect(self.visualization.toggle_grid)
 
-        self.axes_checkbox = QCheckBox("Оси координат")
+        self.axes_checkbox = QCheckBox(self.localization_manager.tr("view_3d_axes"))
         self.axes_checkbox.setChecked(self.visualization.axes_enabled)
         self.axes_checkbox.toggled.connect(self.visualization.toggle_axes)
 
-        self.build_plate_checkbox = QCheckBox("Платформа")
+        self.build_plate_checkbox = QCheckBox(self.localization_manager.tr("view_3d_build_plate"))
         self.build_plate_checkbox.setChecked(self.visualization.build_plate_enabled)
         self.build_plate_checkbox.toggled.connect(self.visualization.toggle_build_plate)
 
-        self.lighting_checkbox = QCheckBox("Освещение")
+        self.lighting_checkbox = QCheckBox(self.localization_manager.tr("view_3d_lighting"))
         self.lighting_checkbox.setChecked(self.visualization.lighting_enabled)
         self.lighting_checkbox.toggled.connect(self.visualization.toggle_lighting)
 
@@ -687,19 +688,19 @@ class Advanced3DVisualizationWidget(QWidget):
         layout.addWidget(view_group)
 
         # Группа G-code визуализации
-        gcode_group = QGroupBox("G-code визуализация")
+        gcode_group = QGroupBox(self.localization_manager.tr("view_3d_gcode_group_title"))
         gcode_layout = QGridLayout()
         gcode_group.setLayout(gcode_layout)
 
-        self.print_moves_checkbox = QCheckBox("Печать")
+        self.print_moves_checkbox = QCheckBox(self.localization_manager.tr("view_3d_gcode_group_print_moves"))
         self.print_moves_checkbox.setChecked(True)
         self.print_moves_checkbox.toggled.connect(self.visualization.toggle_print_moves)
 
-        self.travel_moves_checkbox = QCheckBox("Перемещения")
+        self.travel_moves_checkbox = QCheckBox(self.localization_manager.tr("view_3d_gcode_group_travel_moves"))
         self.travel_moves_checkbox.setChecked(True)
         self.travel_moves_checkbox.toggled.connect(self.visualization.toggle_travel_moves)
 
-        self.retractions_checkbox = QCheckBox("Ретракты")
+        self.retractions_checkbox = QCheckBox(self.localization_manager.tr("view_3d_gcode_group_retracts"))
         self.retractions_checkbox.setChecked(True)
         self.retractions_checkbox.toggled.connect(self.visualization.toggle_retractions)
 
@@ -710,7 +711,7 @@ class Advanced3DVisualizationWidget(QWidget):
         layout.addWidget(gcode_group)
 
         # Группа управления слоями
-        layer_group = QGroupBox("Управление слоями")
+        layer_group = QGroupBox(self.localization_manager.tr("view_3d_layer_group_title"))
         layer_layout = QVBoxLayout()
         layer_group.setLayout(layer_layout)
 
@@ -721,7 +722,7 @@ class Advanced3DVisualizationWidget(QWidget):
         self.layer_slider.valueChanged.connect(self.visualization.set_current_layer)
 
         # Метка текущего слоя
-        self.layer_label = QLabel("Слой: 0 / 0")
+        self.layer_label = QLabel(self.localization_manager.tr("view_3d_layer_group_layer_label")+"0 / 0")
         self.layer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Кнопки управления слоями

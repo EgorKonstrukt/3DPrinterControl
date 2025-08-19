@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(main_splitter)
 
         # Улучшенная 3D визуализация
-        self.visualization_3d = Advanced3DVisualizationWidget(self.config_manager)
+        self.visualization_3d = Advanced3DVisualizationWidget(self.config_manager, self.localization_manager)
         main_splitter.addWidget(self.visualization_3d)
 
         # Установка размеров
