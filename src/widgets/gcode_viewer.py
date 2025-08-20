@@ -1,20 +1,79 @@
 import os
 import re
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-                             QLabel, QTextEdit, QProgressBar, QFileDialog,
+                             QLabel, QPlainTextEdit, QProgressBar, QFileDialog,
                              QGroupBox, QGridLayout, QSpinBox, QCheckBox,
                              QTabWidget, QListWidget, QListWidgetItem,
-                             QSplitter, QFrame, QSlider, QComboBox, QLayout)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread, QMutex
-from PyQt6.QtGui import QFont, QTextCursor, QColor, QTextCharFormat
+                             QSplitter, QFrame, QSlider, QComboBox, QLayout,
+                             QAbstractScrollArea, QScrollBar, QTextEdit, QLineEdit)
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread, QMutex, QRect, QSize, QRegularExpression
+from PyQt6.QtGui import QFont, QTextCursor, QColor, QTextCharFormat, QSyntaxHighlighter, QPainter, \
+    QTextFormat
+
+
+class LineNumberArea(QWidget):
+    def init(self, editor):
+        super().init(editor)
+        self.code_editor = editor
+
+
+class GCodeHighlighter(QSyntaxHighlighter):
+    def init(self, parent=None):
+        super().init(parent)
+        self.keyword_format = QTextCharFormat()
+        self.keyword_format.setForeground(QColor("#569CD6"))
+        self.keyword_format.setFontWeight(QFont.Weight.Bold)
+
+        self.movement_format = QTextCharFormat()
+        self.movement_format.setForeground(QColor("#C586C0"))
+
+        self.value_format = QTextCharFormat()
+        self.value_format.setForeground(QColor("#B5CEA8"))
+
+        self.comment_format = QTextCharFormat()
+        self.comment_format.setForeground(QColor("#608B4E"))
+        self.comment_format.setFontItalic(True)
+
+        self.rules = [
+            (QRegularExpression(r"\bG[0-9]+\b"), self.keyword_format),
+            (QRegularExpression(r"\bM[0-9]+\b"), self.keyword_format),
+            (QRegularExpression(r"\bT[0-9]+\b"), self.keyword_format),
+            (QRegularExpression(r"\bF[0-9.]+\b"), self.movement_format),
+            (QRegularExpression(r"\bX[0-9.-]+\b"), self.movement_format),
+            (QRegularExpression(r"\bY[0-9.-]+\b"), self.movement_format),
+            (QRegularExpression(r"\bZ[0-9.-]+\b"), self.movement_format),
+            (QRegularExpression(r"\bE[0-9.-]+\b"), self.movement_format),
+            (QRegularExpression(r"[0-9]+(\.[0-9]*)?"), self.value_format),
+            (QRegularExpression(r";.*$"), self.comment_format),
+        ]
+
+
+    def highlightBlock(self, text):
+        for pattern, format in self.rules:
+            expression = QRegularExpression(pattern)
+            match = expression.match(text)
+            while match.hasMatch():
+                start = match.capturedStart()
+                length = match.capturedLength()
+                self.setFormat(start, length, format)
+                match = expression.match(text, start + length)
+
+
+
+
+    def sizeHint(self):
+        return QSize(self.code_editor.line_number_area_width(), 0)
+
+
+    def paintEvent(self, event):
+        self.code_editor.line_number_area_paint_event(event)
 
 
 class GCodeViewer(QWidget):
-    """Улучшенный просмотрщик G-code с полноценным отображением как в Simplify3D"""
-
     file_loaded = pyqtSignal(str)
     print_started = pyqtSignal()
     layer_selected = pyqtSignal(int)
+
 
     def __init__(self, gcode_handler):
         super().__init__()
@@ -23,13 +82,15 @@ class GCodeViewer(QWidget):
         self.current_file = ""
         self.analysis_data = {}
         self.layers_data = []
+        self.highlighter = None
 
         self.init_ui()
         self.connect_signals()
 
+
     def init_ui(self):
-        """Инициализация интерфейса"""
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
         file_group = QGroupBox("Управление файлом G-кода")
@@ -51,42 +112,35 @@ class GCodeViewer(QWidget):
         file_layout.addWidget(self.file_label)
         file_layout.addStretch()
 
-        layout.addWidget(file_group)
+        layout.addWidget(file_group, 0)
 
-        # Основной сплиттер
         main_splitter = QSplitter(Qt.Orientation.Horizontal)
-        layout.addWidget(main_splitter)
+        layout.addWidget(main_splitter, 1)
 
-        # Левая панель - вкладки
         left_panel = QTabWidget()
         main_splitter.addWidget(left_panel)
 
-        # Вкладка предпросмотра
         preview_tab = self.create_preview_tab()
         left_panel.addTab(preview_tab, "Код")
 
-        # Вкладка анализа
         analysis_tab = self.create_analysis_tab()
         left_panel.addTab(analysis_tab, "Анализ")
 
-        # Вкладка слоев
         layers_tab = self.create_layers_tab()
         left_panel.addTab(layers_tab, "Слои")
 
-        # Правая панель - управление
         right_panel = self.create_control_panel()
         main_splitter.addWidget(right_panel)
 
-        # Настройка размеров
         main_splitter.setSizes([600, 300])
 
+
     def create_preview_tab(self):
-        """Создание вкладки предпросмотра кода"""
         widget = QWidget()
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
 
-        # Панель управления отображением
         controls_layout = QHBoxLayout()
 
         self.line_numbers_checkbox = QCheckBox("Номера строк")
@@ -108,12 +162,11 @@ class GCodeViewer(QWidget):
 
         layout.addLayout(controls_layout)
 
-        # Текстовое поле с кодом
-        self.gcode_text = QTextEdit()
+        self.gcode_text = QPlainTextEdit()
         self.gcode_text.setReadOnly(True)
         self.gcode_text.setFont(QFont("Consolas", 10))
         self.gcode_text.setStyleSheet("""
-            QTextEdit {
+            QPlainTextEdit {
                 background-color: #2b2b2b;
                 color: #ffffff;
                 border: 1px solid #555555;
@@ -122,9 +175,26 @@ class GCodeViewer(QWidget):
             }
         """)
 
-        layout.addWidget(self.gcode_text)
+        self.line_number_area = LineNumberArea(self.gcode_text)
 
-        # Панель навигации
+        self.gcode_text.blockCountChanged.connect(self.update_line_number_area_width)
+        self.gcode_text.updateRequest.connect(self.update_line_number_area)
+        self.gcode_text.cursorPositionChanged.connect(self.highlight_current_line)
+
+        self.update_line_number_area_width(0)
+        self.highlight_current_line()
+
+        container = QWidget()
+        container_layout = QHBoxLayout()
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+        container.setLayout(container_layout)
+
+        container_layout.addWidget(self.line_number_area, 0)
+        container_layout.addWidget(self.gcode_text, 1)
+
+        layout.addWidget(container)
+
         navigation_layout = QHBoxLayout()
 
         self.goto_line_input = QSpinBox()
@@ -150,13 +220,78 @@ class GCodeViewer(QWidget):
 
         return widget
 
+
+    def line_number_area_width(self):
+        digits = 1
+        count = max(1, self.gcode_text.blockCount())
+        while count >= 10:
+            count //= 10
+            digits += 1
+        space = 3 + self.gcode_text.fontMetrics().horizontalAdvance('9') * digits
+        return space
+
+
+    def update_line_number_area_width(self, newBlockCount):
+        self.gcode_text.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
+
+
+    def update_line_number_area(self, rect, dy):
+        if dy:
+            self.line_number_area.scroll(0, dy)
+        else:
+            self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
+        if rect.contains(self.gcode_text.viewport().rect()):
+            self.update_line_number_area_width(0)
+
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        cr = self.gcode_text.contentsRect()
+        width = self.line_number_area_width()
+        self.line_number_area.setGeometry(QRect(cr.left(), cr.top(), width, cr.height()))
+
+
+    def line_number_area_paint_event(self, event):
+        painter = QPainter(self.line_number_area)
+        painter.fillRect(event.rect(), QColor("#2b2b2b"))
+
+        block = self.gcode_text.firstVisibleBlock()
+        block_number = block.blockNumber()
+        top = self.gcode_text.blockBoundingGeometry(block).translated(self.gcode_text.contentOffset()).top()
+        bottom = top + self.gcode_text.blockBoundingRect(block).height()
+
+        while block.isValid() and top <= event.rect().bottom():
+            if block.isVisible() and bottom >= event.rect().top():
+                number = str(block_number + 1)
+                painter.setPen(QColor("#888888"))
+                painter.drawText(0, int(top), self.line_number_area.width(),
+                                 self.gcode_text.fontMetrics().height(),
+                                 Qt.AlignmentFlag.AlignRight, number)
+
+            block = block.next()
+            top = bottom
+            bottom = top + self.gcode_text.blockBoundingRect(block).height()
+            block_number += 1
+
+
+    def highlight_current_line(self):
+        extra_selections = []
+        if not self.gcode_text.isReadOnly():
+            selection = QTextEdit.ExtraSelection()
+            line_color = QColor("#303030")
+            selection.format.setBackground(line_color)
+            selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
+            selection.cursor = self.gcode_text.textCursor()
+            selection.cursor.clearSelection()
+            extra_selections.append(selection)
+        self.gcode_text.setExtraSelections(extra_selections)
+
+
     def create_analysis_tab(self):
-        """Создание вкладки анализа"""
         widget = QWidget()
         layout = QVBoxLayout()
         widget.setLayout(layout)
 
-        # Основная информация
         info_group = QGroupBox("Основная информация")
         info_layout = QGridLayout()
         info_group.setLayout(info_layout)
@@ -177,7 +312,6 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(info_group)
 
-        # Температуры
         temp_group = QGroupBox("Температурные настройки")
         temp_layout = QGridLayout()
         temp_group.setLayout(temp_layout)
@@ -192,7 +326,6 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(temp_group)
 
-        # Размеры модели
         bounds_group = QGroupBox("Размеры и границы модели")
         bounds_layout = QGridLayout()
         bounds_group.setLayout(bounds_layout)
@@ -216,7 +349,6 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(bounds_group)
 
-        # Статистика движений
         moves_group = QGroupBox("Статистика движений")
         moves_layout = QGridLayout()
         moves_group.setLayout(moves_layout)
@@ -237,13 +369,12 @@ class GCodeViewer(QWidget):
         layout.addStretch()
         return widget
 
+
     def create_layers_tab(self):
-        """Создание вкладки управления слоями"""
         widget = QWidget()
         layout = QVBoxLayout()
         widget.setLayout(layout)
 
-        # Список слоев
         layers_group = QGroupBox("Слои модели")
         layers_layout = QVBoxLayout()
         layers_group.setLayout(layers_layout)
@@ -252,7 +383,6 @@ class GCodeViewer(QWidget):
         self.layers_list.itemClicked.connect(self.on_layer_selected)
         layers_layout.addWidget(self.layers_list)
 
-        # Информация о выбранном слое
         layer_info_layout = QHBoxLayout()
 
         self.layer_info_label = QLabel("Выберите слой для просмотра информации")
@@ -262,7 +392,6 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(layers_group)
 
-        # Фильтры отображения
         filter_group = QGroupBox("Фильтры отображения")
         filter_layout = QGridLayout()
         filter_group.setLayout(filter_layout)
@@ -285,8 +414,8 @@ class GCodeViewer(QWidget):
         layout.addStretch()
         return widget
 
+
     def create_control_panel(self):
-        """Создание панели управления печатью"""
         widget = QWidget()
         widget.setMaximumWidth(300)
         widget.setMinimumWidth(250)
@@ -294,7 +423,6 @@ class GCodeViewer(QWidget):
         layout = QVBoxLayout()
         widget.setLayout(layout)
 
-        # Управление печатью
         print_controls_group = QGroupBox("Управление печатью")
         print_controls_layout = QGridLayout()
         print_controls_group.setLayout(print_controls_layout)
@@ -322,7 +450,6 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(print_controls_group)
 
-        # Прогресс печати
         progress_group = QGroupBox("Прогресс печати")
         progress_layout = QVBoxLayout()
         progress_group.setLayout(progress_layout)
@@ -356,12 +483,10 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(progress_group)
 
-        # Управление слоями
         layer_control_group = QGroupBox("Навигация по слоям")
         layer_control_layout = QVBoxLayout()
         layer_control_group.setLayout(layer_control_layout)
 
-        # Слайдер слоев
         self.layer_slider = QSlider(Qt.Orientation.Horizontal)
         self.layer_slider.setRange(0, 0)
         self.layer_slider.setValue(0)
@@ -371,7 +496,6 @@ class GCodeViewer(QWidget):
         self.current_layer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.current_layer_label.setStyleSheet("QLabel { font-weight: bold; }")
 
-        # Кнопки навигации
         layer_nav_layout = QHBoxLayout()
 
         self.first_layer_btn = QPushButton("⏮")
@@ -402,7 +526,6 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(layer_control_group)
 
-        # Настройки отображения
         display_group = QGroupBox("Настройки отображения")
         display_layout = QGridLayout()
         display_group.setLayout(display_layout)
@@ -423,37 +546,46 @@ class GCodeViewer(QWidget):
         layout.addStretch()
         return widget
 
+
     def connect_signals(self):
-        """Подключение сигналов"""
         self.load_file_btn.clicked.connect(self.load_file)
         self.reload_file_btn.clicked.connect(self.reload_file)
 
-        # Управление отображением
-        self.line_numbers_checkbox.toggled.connect(self.update_preview)
+        self.line_numbers_checkbox.toggled.connect(self.update_line_numbers_visibility)
         self.highlight_moves_checkbox.toggled.connect(self.update_preview)
         self.filter_comments_checkbox.toggled.connect(self.update_preview)
-        self.syntax_highlight_checkbox.toggled.connect(self.update_preview)
+        self.syntax_highlight_checkbox.toggled.connect(self.toggle_syntax_highlight)
 
-        # Управление печатью
         self.start_print_btn.clicked.connect(self.start_print)
         self.pause_print_btn.clicked.connect(self.pause_print)
         self.resume_print_btn.clicked.connect(self.resume_print)
         self.stop_print_btn.clicked.connect(self.stop_print)
 
-        # Навигация по слоям
         self.first_layer_btn.clicked.connect(lambda: self.set_layer(0))
         self.prev_layer_btn.clicked.connect(self.prev_layer)
         self.next_layer_btn.clicked.connect(self.next_layer)
         self.last_layer_btn.clicked.connect(self.last_layer)
 
-        # Обработчики G-code
         if self.gcode_handler:
             self.gcode_handler.print_progress.connect(self.update_print_progress)
             self.gcode_handler.print_status_changed.connect(self.update_print_status)
             self.gcode_handler.gcode_loaded.connect(self.on_gcode_loaded)
 
+
+    def update_line_numbers_visibility(self, visible):
+        self.line_number_area.setVisible(visible)
+        self.update_line_number_area_width(0)
+
+
+    def toggle_syntax_highlight(self, enabled):
+        if enabled:
+            self.highlighter = GCodeHighlighter(self.gcode_text.document())
+        else:
+            self.highlighter = None
+            self.gcode_text.document().setHighlighter(None)
+
+
     def load_file(self):
-        """Загрузка файла"""
         filename, _ = QFileDialog.getOpenFileName(
             self,
             "Загрузить файл G-кода",
@@ -464,13 +596,13 @@ class GCodeViewer(QWidget):
         if filename:
             self.load_gcode_file(filename)
 
+
     def reload_file(self):
-        """Перезагрузка текущего файла"""
         if self.current_file:
             self.load_gcode_file(self.current_file)
 
+
     def load_gcode_file(self, filename):
-        """Загрузка и анализ G-code файла"""
         try:
             self.gcode_commands = self.gcode_handler.load_gcode_file(filename)
 
@@ -486,19 +618,18 @@ class GCodeViewer(QWidget):
             self.file_label.setText(f"Ошибка загрузки: {str(e)}")
             self.file_label.setStyleSheet("QLabel { color: #f44336; font-weight: bold; }")
 
+
     def on_gcode_loaded(self, path_data, layers_data):
-        """Обработка загруженного G-code"""
         self.layers_data = layers_data
         self.update_analysis_display(path_data, layers_data)
         self.update_layers_list()
         self.update_preview()
 
+
     def update_analysis_display(self, path_data, layers_data):
-        """Обновление отображения анализа"""
         if not layers_data:
             return
 
-        # Подсчет статистики
         total_lines = len(self.gcode_commands)
         layer_count = len(layers_data)
 
@@ -515,20 +646,18 @@ class GCodeViewer(QWidget):
                 elif path['type'] == 'retraction':
                     retractions += len(path['points'])
 
-        # Обновление меток
         self.total_lines_label.setText(str(total_lines))
         self.layer_count_label.setText(str(layer_count))
         self.print_moves_label.setText(str(print_moves))
         self.travel_moves_label.setText(str(travel_moves))
         self.retractions_label.setText(str(retractions))
 
-        # Обновление слайдера слоев
         if layer_count > 0:
             self.layer_slider.setRange(0, layer_count - 1)
             self.current_layer_label.setText(f"Слой: 0 / {layer_count - 1}")
 
+
     def update_layers_list(self):
-        """Обновление списка слоев"""
         self.layers_list.clear()
 
         for i, layer_data in enumerate(self.layers_data):
@@ -540,35 +669,22 @@ class GCodeViewer(QWidget):
             item.setData(Qt.ItemDataRole.UserRole, i)
             self.layers_list.addItem(item)
 
+
     def update_preview(self):
-        """Обновление предпросмотра кода"""
         if not self.gcode_commands:
             return
 
         content = []
-        line_num = 1
-
         for cmd in self.gcode_commands:
             line = cmd['original']
-
-            # Фильтрация комментариев
-            if self.filter_comments_checkbox.isChecked() and line.startswith(';'):
-                continue
-
-            # Добавление номеров строк
-            if self.line_numbers_checkbox.isChecked():
-                line = f"{line_num:4d}: {line}"
-                line_num += 1
-
-            content.append(line)
+            if not self.filter_comments_checkbox.isChecked() or not line.startswith(';'):
+                content.append(line)
 
         self.gcode_text.setPlainText('\n'.join(content))
-
-        # Обновление диапазона для перехода к строке
         self.goto_line_input.setRange(1, len(content))
 
+
     def goto_line(self):
-        """Переход к строке"""
         line_number = self.goto_line_input.value() - 1
         cursor = self.gcode_text.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.Start)
@@ -579,19 +695,18 @@ class GCodeViewer(QWidget):
         self.gcode_text.setTextCursor(cursor)
         self.gcode_text.ensureCursorVisible()
 
+
     def find_text(self):
-        """Поиск текста"""
         search_text = self.find_input.text()
         if search_text:
             self.gcode_text.find(search_text)
 
+
     def on_layer_selected(self, item):
-        """Обработка выбора слоя"""
         layer_index = item.data(Qt.ItemDataRole.UserRole)
         if layer_index is not None:
             self.set_layer(layer_index)
 
-            # Обновление информации о слое
             layer_data = self.layers_data[layer_index]
             z_height = layer_data.get('z', 0)
             paths_count = len(layer_data.get('paths', []))
@@ -600,57 +715,57 @@ class GCodeViewer(QWidget):
                 f"Слой {layer_index}: Z={z_height:.2f} мм, Путей: {paths_count}"
             )
 
+
     def on_layer_slider_changed(self, value):
-        """Обработка изменения слайдера слоев"""
         self.set_layer(value)
 
+
     def set_layer(self, layer_index):
-        """Установка текущего слоя"""
         if 0 <= layer_index < len(self.layers_data):
             self.layer_slider.setValue(layer_index)
             self.current_layer_label.setText(f"Слой: {layer_index} / {len(self.layers_data) - 1}")
             self.layer_selected.emit(layer_index)
 
+
     def prev_layer(self):
-        """Предыдущий слой"""
         current = self.layer_slider.value()
         if current > 0:
             self.set_layer(current - 1)
 
+
     def next_layer(self):
-        """Следующий слой"""
         current = self.layer_slider.value()
         if current < self.layer_slider.maximum():
             self.set_layer(current + 1)
 
+
     def last_layer(self):
-        """Последний слой"""
         self.set_layer(self.layer_slider.maximum())
 
+
     def start_print(self):
-        """Начало печати"""
         if self.gcode_commands:
             self.gcode_handler.start_print(self.gcode_commands)
             self.print_started.emit()
 
+
     def pause_print(self):
-        """Пауза печати"""
         self.gcode_handler.pause_print()
 
+
     def resume_print(self):
-        """Возобновление печати"""
         self.gcode_handler.resume_print()
 
+
     def stop_print(self):
-        """Остановка печати"""
         self.gcode_handler.stop_print()
 
+
     def update_print_progress(self, progress):
-        """Обновление прогресса печати"""
         self.print_progress.setValue(progress)
 
+
     def update_print_status(self, status):
-        """Обновление статуса печати"""
         status_text = {
             'printing': 'Печать...',
             'paused': 'Пауза',
@@ -660,8 +775,8 @@ class GCodeViewer(QWidget):
 
         self.progress_label.setText(status_text)
 
+
     def update_controls(self):
-        """Обновление состояния элементов управления"""
         has_file = bool(self.gcode_commands)
         self.start_print_btn.setEnabled(has_file)
 
@@ -669,8 +784,3 @@ class GCodeViewer(QWidget):
             self.file_label.setStyleSheet("QLabel { color: #4CAF50; font-weight: bold; }")
         else:
             self.file_label.setStyleSheet("QLabel { color: #888888; font-style: italic; }")
-
-
-# Дополнительный импорт для поиска
-from PyQt6.QtWidgets import QLineEdit
-
