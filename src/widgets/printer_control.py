@@ -41,5 +41,8 @@ class PrinterControl(QWidget):
     def connect_widget_signals(self):
         self.axis_control_widget.position_changed.connect(self.position_changed.emit)
 
+    def update_position_from_gcode(self, x, y, z):
+        self.axis_control_widget.update_position_from_gcode(x, y, z)
+
     def update_position_from_3d(self, x, y, z):
         self.axis_control_widget.update_position_from_3d(x, y, z)
