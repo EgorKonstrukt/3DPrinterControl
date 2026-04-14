@@ -252,7 +252,7 @@ class GCodeHandler(QObject):
             self.temperatures['bed']['target'] = target_temp
             self.temperature_changed.emit('bed', current_temp, target_temp)
 
-        pos_match = re.search(r'X:\s*(-?\d+\.?\d*)\s*Y:\s*(-?\d+\.?\d*)\s*Z:\s*(-?\d+\.?\d*)', response)
+        pos_match = re.search(r'X:\s*(-?\d+\.?\d*)\s+Y:\s*(-?\d+\.?\d*)\s+Z:\s*(-?\d+\.?\d*)', response)
         if pos_match:
             x = float(pos_match.group(1))
             y = float(pos_match.group(2))
