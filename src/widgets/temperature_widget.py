@@ -1,7 +1,8 @@
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5Chart import QChart, QChartView, QLineSeries, QValueAxis
-from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider, QCheckBox, QSpinBox, QGroupBox, QGridLayout, QFrame, QSplitter, QComboBox, QProgressBar
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QColor, QPen
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSpinBox, QGroupBox, QGridLayout, QProgressBar
+from PyQt5.Qt import Qt
+from pyqt5_chart_widget import ChartWidget
 
 
 class TemperatureWidget(QWidget):
@@ -14,6 +15,7 @@ class TemperatureWidget(QWidget):
         self.extruder_data = []
         self.bed_data = []
         self.max_data_points = 60
+        self.time_counter = 0
 
         self.init_ui()
         self.connect_signals()
@@ -103,38 +105,17 @@ class TemperatureWidget(QWidget):
         group = QGroupBox(self.localization_manager.tr("temperature_chart"))
         layout = QVBoxLayout()
 
-        self.chart = QChart()
-        self.chart.setTitle(self.localization_manager.tr("temperature_chart_title"))
-        self.chart.legend().hide()
-        self.chart.setAnimationOptions(QChart.AnimationOption.SeriesAnimations)
+        self.chart = ChartWidget(show_toolbar=False, show_legend=True)
+        self.chart.setLabel("bottom", self.localization_manager.tr("temperature_chart_time"))
+        self.chart.setLabel("left", self.localization_manager.tr("temperature_chart_temp"))
+        
+        red_pen = QPen(QColor(255, 0, 0), 2)
+        blue_pen = QPen(QColor(0, 0, 255), 2)
+        
+        self.extruder_line = self.chart.plot(color="#FF0000", width=2, label=self.localization_manager.tr("temperature_extruder"))
+        self.bed_line = self.chart.plot(color="#0000FF", width=2, label=self.localization_manager.tr("temperature_bed"))
 
-        self.extruder_series = QLineSeries()
-        self.extruder_series.setName(self.localization_manager.tr("temperature_extruder"))
-        self.chart.addSeries(self.extruder_series)
-
-        self.bed_series = QLineSeries()
-        self.bed_series.setName(self.localization_manager.tr("temperature_bed"))
-        self.chart.addSeries(self.bed_series)
-
-        axis_x = QValueAxis()
-        axis_x.setLabelFormat("%i")
-        axis_x.setTitleText(self.localization_manager.tr("temperature_chart_time"))
-        self.chart.addAxis(axis_x, Qt.AlignBottom)
-        self.extruder_series.attachAxis(axis_x)
-        self.bed_series.attachAxis(axis_x)
-
-        axis_y = QValueAxis()
-        axis_y.setLabelFormat("%i °C")
-        axis_y.setTitleText(self.localization_manager.tr("temperature_chart_temp"))
-        axis_y.setRange(0, 300)
-        self.chart.addAxis(axis_y, Qt.AlignLeft)
-        self.extruder_series.attachAxis(axis_y)
-        self.bed_series.attachAxis(axis_y)
-
-        self.chart_view = QChartView(self.chart)
-        self.chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-        layout.addWidget(self.chart_view)
-
+        layout.addWidget(self.chart)
         group.setLayout(layout)
         return group
 
@@ -154,7 +135,7 @@ class TemperatureWidget(QWidget):
 
     def start_chart_timer(self):
         self.chart_timer = QTimer()
-        self.chart_timer.setInterval(1000)  # Update every 1 second
+        self.chart_timer.setInterval(1000)
         self.chart_timer.timeout.connect(self.update_chart)
         self.chart_timer.start()
 
@@ -178,11 +159,11 @@ class TemperatureWidget(QWidget):
         if heater == 'extruder':
             self.extruder_temp_current.setText(f"{current} °C")
             self.extruder_temp_progress.setValue(int(current))
-            self.extruder_data.append(current)
+            self.extruder_data.append((self.time_counter, current))
         elif heater == 'bed':
             self.bed_temp_current.setText(f"{current} °C")
             self.bed_temp_progress.setValue(int(current))
-            self.bed_data.append(current)
+            self.bed_data.append((self.time_counter, current))
 
         if len(self.extruder_data) > self.max_data_points:
             self.extruder_data.pop(0)
@@ -190,15 +171,23 @@ class TemperatureWidget(QWidget):
             self.bed_data.pop(0)
 
     def update_chart(self):
-        self.extruder_series.clear()
-        self.bed_series.clear()
-        for i, temp in enumerate(self.extruder_data):
-            self.extruder_series.append(i, temp)
-        for i, temp in enumerate(self.bed_data):
-            self.bed_series.append(i, temp)
+        self.time_counter += 1
+        
+        extruder_xs = [t for t, _ in self.extruder_data]
+        extruder_ys = [temp for _, temp in self.extruder_data]
+        bed_xs = [t for t, _ in self.bed_data]
+        bed_ys = [temp for _, temp in self.bed_data]
+        
+        self.extruder_line.setData(extruder_xs, extruder_ys)
+        self.bed_line.setData(bed_xs, bed_ys)
 
         if self.extruder_data or self.bed_data:
-            max_val = max(max(self.extruder_data) if self.extruder_data else 0, max(self.bed_data) if self.bed_data else 0)
-            min_val = min(min(self.extruder_data) if self.extruder_data else 300, min(self.bed_data) if self.bed_data else 300)
-            self.chart.axes(Qt.AlignLeft)[0].setRange(min_val - 10, max_val + 10)
-            self.chart.axes(Qt.AlignBottom)[0].setRange(0, self.max_data_points)
+            all_temps = [temp for _, temp in self.extruder_data] + [temp for _, temp in self.bed_data]
+            if all_temps:
+                max_val = max(all_temps)
+                min_val = min(all_temps)
+                self.chart._vy0 = max(0, min_val - 10)
+                self.chart._vy1 = max_val + 10
+                self.chart._vx0 = 0
+                self.chart._vx1 = self.max_data_points
+                self.chart._canvas.update()

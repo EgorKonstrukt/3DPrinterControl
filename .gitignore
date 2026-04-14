@@ -1,26 +1,14 @@
 ```
-# Python
-__pycache__/
+# Compiled Python files
 *.pyc
-*.pyo
-*.pyd
-.Python
-env/
+__pycache__/
+
+# Virtual environments
 venv/
 .venv/
-.ENV
-.ENV.local
 .env
-.env.local
-.env.*
-
-# Build and distribution artifacts
-build/
-dist/
-*.egg
-*.egg-info/
-*.so
-*.dylib
+*.env
+*.env.*
 
 # IDE and editor files
 .vscode/
@@ -32,12 +20,24 @@ dist/
 # Logs
 *.log
 
-# Coverage reports
+# Build and distribution
+build/
+dist/
+*.egg-info/
+
+# Testing
 .coverage
-coverage/
 htmlcov/
+.coverage.*
+.tox/
+
+# OS generated files
+.DS_Store
+Thumbs.db
 
 # MyPy cache
 .mypy_cache/
-```
+
+# Pytest cache
+.pytest_cache/
 ```
