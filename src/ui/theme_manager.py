@@ -1,5 +1,5 @@
 import os
-from PyQt6.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication
 
 
 class ThemeManager:

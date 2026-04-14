@@ -1,9 +1,7 @@
 import os
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QDockWidget, QMessageBox, QFileDialog, QApplication,
-                             QSplitter)
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QAction, QKeySequence
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QDockWidget, QMessageBox, QFileDialog, QApplication, QSplitter
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QAction, QKeySequence
 
 from core.serial_comm import SerialComm
 from core.gcode_handler import GCodeHandler
@@ -48,67 +46,58 @@ class MainWindow(QMainWindow):
         self._setup_dock_options()
 
     def _create_central_widget(self):
-        """Создание центрального виджета с улучшенной 3D визуализацией"""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
         main_layout = QHBoxLayout()
         central_widget.setLayout(main_layout)
 
-        # Основной сплиттер
-        main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        main_splitter = QSplitter(Qt.Horizontal)
         main_layout.addWidget(main_splitter)
 
-        # Улучшенная 3D визуализация
         self.visualization_3d = Advanced3DVisualizationWidget(self.config_manager, self.localization_manager)
         main_splitter.addWidget(self.visualization_3d)
 
-        # Установка размеров
         main_splitter.setSizes([1000, 400])
 
     def _create_dock_widgets(self):
-        """Создание док-виджетов"""
-        # Управление принтером
         self.printer_control_dock = QDockWidget(self.localization_manager.tr("printer_control"), self)
         self.printer_control_widget = PrinterControl(gcode_handler=self.gcode_handler,
                                                      localization_manager=self.localization_manager,
                                                      config_manager=self.config_manager)
         self.printer_control_dock.setWidget(self.printer_control_widget)
         self._setup_dock_features(self.printer_control_dock)
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.printer_control_dock)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.printer_control_dock)
 
         self.gcode_dock = QDockWidget(self.localization_manager.tr("gcode_viewer"), self)
         self.gcode_widget = GCodeViewer(self.gcode_handler)
         self.gcode_dock.setWidget(self.gcode_widget)
         self._setup_dock_features(self.gcode_dock)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.gcode_dock)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.gcode_dock)
 
 
         self.console_dock = QDockWidget(self.localization_manager.tr("console"), self)
         self.console_widget = ConsoleWidget(self.serial_comm)
         self.console_dock.setWidget(self.console_widget)
         self._setup_dock_features(self.console_dock)
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.console_dock)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.console_dock)
 
 
     def _setup_dock_features(self, dock):
-            """Настройка возможностей док-виджета"""
             dock.setFeatures(
-                QDockWidget.DockWidgetFeature.DockWidgetMovable |
-                QDockWidget.DockWidgetFeature.DockWidgetFloatable |
-                QDockWidget.DockWidgetFeature.DockWidgetClosable
+                QDockWidget.DockWidgetMovable |
+                QDockWidget.DockWidgetFloatable |
+                QDockWidget.DockWidgetClosable
             )
 
     def _setup_dock_options(self):
-        """Настройка опций док-виджетов"""
         self.setDockOptions(
-            QMainWindow.DockOption.AllowNestedDocks |
-            QMainWindow.DockOption.AllowTabbedDocks |
-            QMainWindow.DockOption.AnimatedDocks
+            QMainWindow.AllowNestedDocks |
+            QMainWindow.AllowTabbedDocks |
+            QMainWindow.AnimatedDocks
         )
 
     def _init_managers(self):
-        """Инициализация менеджеров"""
         self.menu_manager = MenuManager(self, localization_manager=self.localization_manager)
         self.toolbar_manager = ToolbarManager(self)
         self.status_manager = StatusManager(self)
@@ -119,18 +108,14 @@ class MainWindow(QMainWindow):
         self.status_manager.create_status_bar()
 
     def _connect_signals(self):
-        """Подключение сигналов"""
-        # Связь между управлением принтером и 3D визуализацией
         self.printer_control_widget.position_changed.connect(
             self.visualization_3d.update_position
         )
 
-        # Связь между 3D визуализацией и управлением принтером
         self.visualization_3d.position_clicked.connect(
             self._on_3d_position_clicked
         )
 
-        # Связь между G-code обработчиком и статус-баром
         self.gcode_handler.position_changed.connect(
             self.status_manager.update_position_display
         )
@@ -141,7 +126,6 @@ class MainWindow(QMainWindow):
             self.status_manager.update_print_status
         )
 
-        # Связь между G-code обработчиком и 3D визуализацией
         self.gcode_handler.gcode_loaded.connect(
             self.visualization_3d.load_gcode_path
         )
@@ -149,37 +133,30 @@ class MainWindow(QMainWindow):
             self.visualization_3d.update_position
         )
 
-        # Связь между G-code просмотрщиком и 3D визуализацией
         self.gcode_widget.layer_selected.connect(
             self.visualization_3d.visualization.set_current_layer
         )
 
-        # Связь с последовательным соединением
         self.serial_comm.connection_changed.connect(
             self.status_manager.update_connection_status
         )
 
-        # Связь с конфигурацией
         self.config_manager.config_changed.connect(self._on_config_changed)
 
     def _start_status_timer(self):
-        """Запуск таймера обновления статуса"""
         self.status_timer = QTimer()
         self.status_timer.timeout.connect(self.status_manager.update_status)
         self.status_timer.start(1000)
 
     def _on_3d_position_clicked(self, x, y, z):
-        """Обработка клика по 3D пространству"""
         if hasattr(self.printer_control_widget, 'update_position_from_3d'):
             self.printer_control_widget.update_position_from_3d(x, y, z)
 
     def _on_config_changed(self, path, value):
-        """Обработка изменения конфигурации"""
         if path.startswith('ui.theme'):
             self.theme_manager.apply_theme(value)
 
     def load_gcode_file(self):
-        """Загрузка G-code файла"""
         filename, _ = QFileDialog.getOpenFileName(
             self,
             self.localization_manager.tr("file_load_gcode"),
@@ -188,20 +165,17 @@ class MainWindow(QMainWindow):
         )
         if filename:
             self.gcode_widget.load_gcode_file(filename)
-            self.status_manager.show_message(f"{self.localization_manager.tr("message_gcode_loaded")} {os.path.basename(filename)}")
+            self.status_manager.show_message(f"{self.localization_manager.tr('message_gcode_loaded')} {os.path.basename(filename)}")
 
     def start_print(self):
-        """Начало печати"""
         if hasattr(self.gcode_widget, 'start_print'):
             self.gcode_widget.start_print()
 
     def quick_connect(self):
-        """Быстрое подключение"""
         if hasattr(self.printer_control_widget, 'connect_printer'):
             self.printer_control_widget.connect_printer()
 
     def quick_disconnect(self):
-        """Быстрое отключение"""
         if hasattr(self.printer_control_widget, 'disconnect_printer'):
             self.printer_control_widget.disconnect_printer()
 
@@ -215,33 +189,28 @@ class MainWindow(QMainWindow):
         QMessageBox.critical(self, self.localization_manager.tr("status_emergency_stop"), self.localization_manager.tr("message_emergency_stop_critical"))
 
     def open_calibration(self):
-        """Открытие диалога калибровки"""
         dialog = CalibrationDialog(self.gcode_handler, self.config_manager, self)
-        dialog.exec()
+        dialog.exec_()
 
     def open_macros(self):
-        """Открытие диалога макросов"""
         dialog = MacroDialog(self.gcode_handler, self.config_manager, self)
-        dialog.exec()
+        dialog.exec_()
 
     def open_settings(self):
-        """Открытие настроек"""
         dialog = SettingsDialog(self.config_manager, self)
-        if dialog.exec() == dialog.DialogCode.Accepted:
+        if dialog.exec_() == dialog.Accepted:
             self._apply_settings()
 
     def toggle_fullscreen(self):
-        """Переключение полноэкранного режима"""
         if self.isFullScreen():
             self.showNormal()
         else:
             self.showFullScreen()
 
     def reset_layout(self):
-        """Сброс расположения окон"""
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.printer_control_dock)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.gcode_dock)
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.console_dock)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.printer_control_dock)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.gcode_dock)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.console_dock)
 
         for dock in [self.printer_control_dock, self.gcode_dock, self.console_dock, self.temperature_dock]:
             dock.show()
@@ -267,11 +236,9 @@ class MainWindow(QMainWindow):
         self.status_manager.show_message(self.localization_manager.tr("view_3d_clear_trail"))
 
     def _apply_settings(self):
-        """Применение настроек"""
         theme = self.config_manager.get('ui.theme', 'dark')
         self.theme_manager.apply_theme(theme)
 
-        # Обновление размеров области печати
         build_volume = self.config_manager.get('printer.build_volume')
         if build_volume:
             self.visualization_3d.visualization.set_build_volume(
@@ -281,7 +248,6 @@ class MainWindow(QMainWindow):
             )
 
     def _restore_settings(self):
-        """Восстановление настроек"""
         geometry, state = self.config_manager.load_layout()
         if geometry and state:
             self.restoreGeometry(geometry)
@@ -309,11 +275,11 @@ class MainWindow(QMainWindow):
                 self,
                 self.localization_manager.tr("message_confirm_exit_connected"),
                 self.localization_manager.tr("message_confirm_exit_connected"),
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
             )
 
-            if reply == QMessageBox.StandardButton.Yes:
+            if reply == QMessageBox.Yes:
                 self.serial_comm.disconnect()
                 event.accept()
             else:

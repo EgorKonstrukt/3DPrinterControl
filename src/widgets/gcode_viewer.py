@@ -1,13 +1,13 @@
 import os
 import re
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                              QLabel, QPlainTextEdit, QProgressBar, QFileDialog,
                              QGroupBox, QGridLayout, QSpinBox, QCheckBox,
                              QTabWidget, QListWidget, QListWidgetItem,
                              QSplitter, QFrame, QSlider, QComboBox, QLayout,
                              QAbstractScrollArea, QScrollBar, QTextEdit, QLineEdit)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread, QMutex, QRect, QSize, QRegularExpression
-from PyQt6.QtGui import QFont, QTextCursor, QColor, QTextCharFormat, QSyntaxHighlighter, QPainter, \
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread, QMutex, QRect, QSize, QRegularExpression
+from PyQt5.QtGui import QFont, QTextCursor, QColor, QTextCharFormat, QSyntaxHighlighter, QPainter, \
     QTextFormat
 
 
@@ -114,7 +114,7 @@ class GCodeViewer(QWidget):
 
         layout.addWidget(file_group, 0)
 
-        main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        main_splitter = QSplitter(Qt.Horizontal)
         layout.addWidget(main_splitter, 1)
 
         left_panel = QTabWidget()
@@ -266,7 +266,7 @@ class GCodeViewer(QWidget):
                 painter.setPen(QColor("#888888"))
                 painter.drawText(0, int(top), self.line_number_area.width(),
                                  self.gcode_text.fontMetrics().height(),
-                                 Qt.AlignmentFlag.AlignRight, number)
+                                 Qt.AlignRight, number)
 
             block = block.next()
             top = bottom
@@ -471,11 +471,11 @@ class GCodeViewer(QWidget):
         """)
 
         self.progress_label = QLabel("Готов к печати")
-        self.progress_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.progress_label.setAlignment(Qt.AlignCenter)
         self.progress_label.setStyleSheet("QLabel { font-weight: bold; }")
 
         self.time_remaining_label = QLabel("Время: --:--")
-        self.time_remaining_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.time_remaining_label.setAlignment(Qt.AlignCenter)
 
         progress_layout.addWidget(self.progress_label)
         progress_layout.addWidget(self.print_progress)
@@ -487,13 +487,13 @@ class GCodeViewer(QWidget):
         layer_control_layout = QVBoxLayout()
         layer_control_group.setLayout(layer_control_layout)
 
-        self.layer_slider = QSlider(Qt.Orientation.Horizontal)
+        self.layer_slider = QSlider(Qt.Horizontal)
         self.layer_slider.setRange(0, 0)
         self.layer_slider.setValue(0)
         self.layer_slider.valueChanged.connect(self.on_layer_slider_changed)
 
         self.current_layer_label = QLabel("Слой: 0 / 0")
-        self.current_layer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.current_layer_label.setAlignment(Qt.AlignCenter)
         self.current_layer_label.setStyleSheet("QLabel { font-weight: bold; }")
 
         layer_nav_layout = QHBoxLayout()
@@ -531,7 +531,7 @@ class GCodeViewer(QWidget):
         display_group.setLayout(display_layout)
 
         self.animation_speed_label = QLabel("Скорость анимации:")
-        self.animation_speed_slider = QSlider(Qt.Orientation.Horizontal)
+        self.animation_speed_slider = QSlider(Qt.Horizontal)
         self.animation_speed_slider.setRange(1, 100)
         self.animation_speed_slider.setValue(50)
 

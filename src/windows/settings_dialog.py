@@ -1,8 +1,8 @@
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTabWidget,
+from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTabWidget,
                              QWidget, QFormLayout, QSpinBox, QDoubleSpinBox,
                              QComboBox, QCheckBox, QLineEdit, QPushButton,
                              QGroupBox, QDialogButtonBox, QSlider, QLabel)
-from PyQt6.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 
 class SettingsDialog(QDialog):
@@ -214,7 +214,7 @@ class SettingsDialog(QDialog):
         layout.addRow(self.highlight_current_line)
 
         animation_layout = QHBoxLayout()
-        self.animation_speed = QSlider(Qt.Orientation.Horizontal)
+        self.animation_speed = QSlider(Qt.Horizontal)
         self.animation_speed.setRange(1, 50)
         self.animation_speed_label = QLabel("1.0x")
         self.animation_speed.valueChanged.connect(
@@ -352,15 +352,15 @@ class SettingsDialog(QDialog):
         self._save_settings()
 
     def _restore_defaults(self):
-        from PyQt6.QtWidgets import QMessageBox
+        from PyQt5.QtWidgets import QMessageBox
         reply = QMessageBox.question(
             self,
             "Восстановление настроек",
             "Восстановить настройки по умолчанию?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            QMessageBox.Yes | QMessageBox.No
         )
 
-        if reply == QMessageBox.StandardButton.Yes:
+        if reply == QMessageBox.Yes:
             self.config_manager.config_data = self.config_manager._get_default_config()
             self._load_settings()
 

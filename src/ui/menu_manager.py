@@ -1,5 +1,5 @@
-from PyQt6.QtGui import QAction, QKeySequence
-from PyQt6.QtWidgets import QMessageBox
+from PyQt5.QtGui import QAction, QKeySequence
+from PyQt5.QtWidgets import QMessageBox
 
 
 class MenuManager:

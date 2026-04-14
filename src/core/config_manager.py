@@ -1,8 +1,8 @@
 import json
 import os
 from typing import Any, Dict
-from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtCore import QByteArray
+from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QByteArray
 
 
 class ConfigManager(QObject):

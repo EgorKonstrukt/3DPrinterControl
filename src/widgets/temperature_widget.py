@@ -1,10 +1,10 @@
-from PyQt6.QtCore import QTimer
-from PyQt6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
-from PyQt6.QtGui import QPainter
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+from PyQt5.QtCore import QTimer
+from PyQt5.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
+from PyQt5.QtGui import QPainter
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                              QLabel, QSlider, QCheckBox, QSpinBox, QGroupBox,
                              QGridLayout, QFrame, QSplitter, QComboBox, QProgressBar, )
-from PyQt6.uic.properties import QtWidgets
+from PyQt5.QtCore import Qt as QtWidgets
 
 
 class TemperatureWidget(QWidget):

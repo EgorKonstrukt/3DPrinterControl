@@ -1,8 +1,8 @@
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTabWidget,
+from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTabWidget,
                              QWidget, QFormLayout, QSpinBox, QDoubleSpinBox,
                              QPushButton, QGroupBox, QDialogButtonBox, QLabel,
                              QProgressBar, QTextEdit, QGridLayout)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 
 
 class CalibrationDialog(QDialog):

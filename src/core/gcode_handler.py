@@ -1,7 +1,7 @@
 import re
 import time
 import threading
-from PyQt6.QtCore import QObject, pyqtSignal, QTimer
+from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 
 
 class GCodeHandler(QObject):
