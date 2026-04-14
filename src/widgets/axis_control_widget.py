@@ -28,7 +28,7 @@ class AxisControlWidget(QWidget):
         self.setLayout(layout)
 
     def _create_step_group(self):
-        group = QGroupBox("Размер шага")
+        group = QGroupBox(self.localization_manager.tr("control_step_size"))
         layout = QHBoxLayout()
 
         self.step_buttons = []
@@ -44,7 +44,7 @@ class AxisControlWidget(QWidget):
         return group
 
     def _create_position_group(self):
-        group = QGroupBox("Текущая позиция")
+        group = QGroupBox(self.localization_manager.tr("control_current_position"))
         layout = QGridLayout()
 
         self.x_pos_label = QLabel("0.00")
@@ -65,7 +65,7 @@ class AxisControlWidget(QWidget):
         return group
 
     def _create_control_group(self):
-        group = QGroupBox("Управление осями")
+        group = QGroupBox(self.localization_manager.tr("control_axis"))
         layout = QGridLayout()
 
         self.x_minus_btn = QPushButton("X-")
@@ -88,7 +88,7 @@ class AxisControlWidget(QWidget):
         return group
 
     def _create_feedrate_group(self):
-        group = QGroupBox("Скорость перемещения")
+        group = QGroupBox(self.localization_manager.tr("control_feedrate"))
         layout = QHBoxLayout()
 
         self.feedrate_spinbox = QSpinBox()
@@ -101,7 +101,7 @@ class AxisControlWidget(QWidget):
         return group
 
     def _create_manual_group(self):
-        group = QGroupBox("Ручное позиционирование")
+        group = QGroupBox(self.localization_manager.tr("control_manual_position"))
         layout = QGridLayout()
 
         self.x_input = QDoubleSpinBox()
@@ -119,7 +119,7 @@ class AxisControlWidget(QWidget):
         self.z_input.setDecimals(2)
         self.z_input.setSuffix(" мм")
 
-        self.move_btn = QPushButton("Переместить")
+        self.move_btn = QPushButton(self.localization_manager.tr("control_move"))
         self.move_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")
 
         layout.addWidget(QLabel("X:"), 0, 0)
@@ -134,15 +134,15 @@ class AxisControlWidget(QWidget):
         return group
 
     def _create_home_group(self):
-        group = QGroupBox("Калибровка осей")
+        group = QGroupBox(self.localization_manager.tr("control_calibration"))
         layout = QGridLayout()
 
-        self.home_all_btn = QPushButton("HOME Все")
-        self.home_x_btn = QPushButton("HOME X")
-        self.home_y_btn = QPushButton("HOME Y")
-        self.home_z_btn = QPushButton("HOME Z")
-        self.disable_steppers_btn = QPushButton("Отключить моторы")
-        self.enable_steppers_btn = QPushButton("Включить моторы")
+        self.home_all_btn = QPushButton(self.localization_manager.tr("control_home_all"))
+        self.home_x_btn = QPushButton(self.localization_manager.tr("control_home_x"))
+        self.home_y_btn = QPushButton(self.localization_manager.tr("control_home_y"))
+        self.home_z_btn = QPushButton(self.localization_manager.tr("control_home_z"))
+        self.disable_steppers_btn = QPushButton(self.localization_manager.tr("control_disable_motors"))
+        self.enable_steppers_btn = QPushButton(self.localization_manager.tr("control_enable_motors"))
 
         layout.addWidget(self.home_all_btn, 0, 0, 1, 2)
         layout.addWidget(self.home_x_btn, 1, 0)

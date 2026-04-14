@@ -498,11 +498,12 @@ class Advanced3DVisualization(QOpenGLWidget):
         self.update()
 
     def mousePressEvent(self, event: QMouseEvent):
-        """Обработка нажатия мыши"""
         self.last_mouse_pos = event.localPos()
 
-        if event.button() == Qt.LeftButton and event.modifiers() & Qt.ControlModifier:
+        if event.button() == Qt.LeftButton:
             self.handle_position_click(event)
+        elif event.button() == Qt.RightButton or event.buttons() & Qt.RightButton:
+            pass
 
     def mouseMoveEvent(self, event: QMouseEvent):
         """Исправленная обработка движения мыши для управления камерой"""
@@ -538,18 +539,23 @@ class Advanced3DVisualization(QOpenGLWidget):
         self.last_mouse_pos = event.localPos()
 
     def wheelEvent(self, event: QWheelEvent):
-        """Обработка колеса мыши для масштабирования"""
         delta = event.angleDelta().y()
-        zoom_factor = 1.0 + (delta / 1200.0)
-
-        self.camera_distance /= zoom_factor
-        self.camera_distance = max(50.0, min(2000.0, self.camera_distance))
-
+        
+        if delta > 0:
+            new_z = self.print_head_pos[2] + self.get_current_step()
+        else:
+            new_z = self.print_head_pos[2] - self.get_current_step()
+        
+        new_z = max(0.0, min(new_z, self.build_volume[2]))
+        self.print_head_pos[2] = new_z
+        
+        self.position_clicked.emit(self.print_head_pos[0], self.print_head_pos[1], new_z)
         self.update()
 
+    def get_current_step(self):
+        return 1.0
+
     def handle_position_click(self, event):
-        """Обработка клика для установки позиции"""
-        # Упрощенная версия - требует доработки для точного позиционирования
         x = event.localPos().x()
         y = event.localPos().y()
 
@@ -557,12 +563,13 @@ class Advanced3DVisualization(QOpenGLWidget):
         width = viewport[2]
         height = viewport[3]
 
-        # Примерное преобразование экранных координат в мировые
         norm_x = (x / width) * self.build_volume[0]
         norm_y = ((height - y) / height) * self.build_volume[1]
-        norm_z = self.print_head_pos[2]  # Сохраняем текущую высоту
+        norm_z = self.print_head_pos[2]
 
+        self.print_head_pos = [norm_x, norm_y, norm_z]
         self.position_clicked.emit(norm_x, norm_y, norm_z)
+        self.update()
 
     def toggle_grid(self):
         """Переключение отображения сетки"""
