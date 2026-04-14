@@ -1,11 +1,11 @@
 import sys
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, 
+from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, 
                              QLabel, QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox,
                              QGroupBox, QGridLayout, QTextEdit, QProgressBar, 
                              QWizard, QWizardPage, QCheckBox, QSlider, QFrame,
                              QTabWidget, QWidget, QMessageBox, QFileDialog)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread
-from PyQt6.QtGui import QFont, QPixmap, QPainter, QPen, QColor
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread
+from PyQt5.QtGui import QFont, QPixmap, QPainter, QPen, QColor
 
 class CalibrationStep(QWizardPage):
     def __init__(self, title, description, gcode_handler):
@@ -228,10 +228,10 @@ class BedLevelingStep(CalibrationStep):
             self, 
             "Автоуровень", 
             "Запустить автоматическое выравнивание стола?\nЭто может занять несколько минут.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            QMessageBox.Yes | QMessageBox.No
         )
         
-        if reply == QMessageBox.StandardButton.Yes:
+        if reply == QMessageBox.Yes:
             self.gcode_handler.send_command("G29")
 
 class ExtruderCalibrationStep(CalibrationStep):
@@ -393,7 +393,7 @@ class CalibrationDialog(QDialog):
         
         title_label = QLabel("Калибровка 3D-принтера")
         title_label.setStyleSheet("QLabel { font-size: 18px; font-weight: bold; }")
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
         description_label = QLabel(
@@ -401,7 +401,7 @@ class CalibrationDialog(QDialog):
             "Рекомендуется выполнять калибровку в указанном порядке."
         )
         description_label.setWordWrap(True)
-        description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        description_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(description_label)
         
         buttons_layout = QVBoxLayout()
@@ -436,7 +436,7 @@ class CalibrationDialog(QDialog):
     
     def open_wizard(self):
         wizard = CalibrationWizard(self.gcode_handler, self)
-        wizard.exec()
+        wizard.exec_()
     
     def calibrate_home(self):
         dialog = QDialog(self)
@@ -452,7 +452,7 @@ class CalibrationDialog(QDialog):
         layout.addWidget(close_btn)
         
         dialog.setLayout(layout)
-        dialog.exec()
+        dialog.exec_()
     
     def calibrate_bed(self):
         dialog = QDialog(self)
@@ -468,7 +468,7 @@ class CalibrationDialog(QDialog):
         layout.addWidget(close_btn)
         
         dialog.setLayout(layout)
-        dialog.exec()
+        dialog.exec_()
     
     def calibrate_extruder(self):
         dialog = QDialog(self)
@@ -484,7 +484,7 @@ class CalibrationDialog(QDialog):
         layout.addWidget(close_btn)
         
         dialog.setLayout(layout)
-        dialog.exec()
+        dialog.exec_()
     
     def calibrate_pid(self):
         dialog = QDialog(self)
@@ -511,17 +511,17 @@ class CalibrationDialog(QDialog):
         layout.addWidget(close_btn)
         
         dialog.setLayout(layout)
-        dialog.exec()
+        dialog.exec_()
     
     def run_pid_calibration(self, command):
         reply = QMessageBox.question(
             self, 
             "PID калибровка", 
             f"Запустить PID калибровку?\nКоманда: {command}\nЭто может занять 10-15 минут.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            QMessageBox.Yes | QMessageBox.No
         )
         
-        if reply == QMessageBox.StandardButton.Yes:
+        if reply == QMessageBox.Yes:
             self.gcode_handler.send_command(command)
             QMessageBox.information(
                 self, 

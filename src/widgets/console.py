@@ -1,12 +1,12 @@
 import sys
 import re
 from datetime import datetime
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
                              QTextEdit, QLineEdit, QComboBox, QCheckBox, 
                              QGroupBox, QSplitter, QTabWidget, QLabel,
                              QSpinBox, QFileDialog, QMessageBox, QFrame)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread
-from PyQt6.QtGui import QFont, QTextCursor, QColor, QTextCharFormat, QPalette
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread
+from PyQt5.QtGui import QFont, QTextCursor, QColor, QTextCharFormat, QPalette
 
 class AdvancedConsole(QWidget):
     command_sent = pyqtSignal(str)
@@ -30,7 +30,7 @@ class AdvancedConsole(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
         
-        splitter = QSplitter(Qt.Orientation.Vertical)
+        splitter = QSplitter(Qt.Vertical)
         layout.addWidget(splitter)
         
         console_widget = self.create_console_widget()

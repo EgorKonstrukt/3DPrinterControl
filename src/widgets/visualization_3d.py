@@ -1,12 +1,12 @@
 import sys
 import math
 import numpy as np
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                              QLabel, QSlider, QCheckBox, QSpinBox, QGroupBox,
                              QGridLayout, QFrame, QSplitter, QComboBox)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPointF
-from PyQt6.QtGui import QMouseEvent, QWheelEvent, QPainter, QPen, QBrush, QColor
-from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QPointF
+from PyQt5.QtGui import QMouseEvent, QWheelEvent, QPainter, QPen, QBrush, QColor
+from PyQt5.QtWidgets import QOpenGLWidget
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -60,7 +60,7 @@ class Advanced3DVisualization(QOpenGLWidget):
         self.animation_speed = self.config_manager.get("gcode.animation_speed", 0.1)
 
         self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setFocusPolicy(Qt.StrongFocus)
 
         self.animation_timer = QTimer()
         self.animation_timer.timeout.connect(self.animate)
@@ -499,21 +499,21 @@ class Advanced3DVisualization(QOpenGLWidget):
 
     def mousePressEvent(self, event: QMouseEvent):
         """Обработка нажатия мыши"""
-        self.last_mouse_pos = event.position()
+        self.last_mouse_pos = event.localPos()
 
-        if event.button() == Qt.MouseButton.LeftButton and event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+        if event.button() == Qt.LeftButton and event.modifiers() & Qt.ControlModifier:
             self.handle_position_click(event)
 
     def mouseMoveEvent(self, event: QMouseEvent):
         """Исправленная обработка движения мыши для управления камерой"""
         if self.last_mouse_pos is None:
-            self.last_mouse_pos = event.position()
+            self.last_mouse_pos = event.localPos()
             return
 
-        dx = event.position().x() - self.last_mouse_pos.x()
-        dy = event.position().y() - self.last_mouse_pos.y()
+        dx = event.localPos().x() - self.last_mouse_pos.x()
+        dy = event.localPos().y() - self.last_mouse_pos.y()
 
-        if event.buttons() & Qt.MouseButton.RightButton:
+        if event.buttons() & Qt.RightButton:
             # Вращение камеры
             self.camera_rotation_y += dx * self.mouse_sensitivity
             self.camera_rotation_x += dy * self.mouse_sensitivity
@@ -523,7 +523,7 @@ class Advanced3DVisualization(QOpenGLWidget):
             self.camera_rotation_y = self.camera_rotation_y % 360
 
             self.update()
-        elif event.buttons() & Qt.MouseButton.MiddleButton:
+        elif event.buttons() & Qt.MiddleButton:
             # Панорамирование
             move_speed = self.camera_distance * 0.001
 
@@ -535,7 +535,7 @@ class Advanced3DVisualization(QOpenGLWidget):
 
             self.update()
 
-        self.last_mouse_pos = event.position()
+        self.last_mouse_pos = event.localPos()
 
     def wheelEvent(self, event: QWheelEvent):
         """Обработка колеса мыши для масштабирования"""
@@ -550,8 +550,8 @@ class Advanced3DVisualization(QOpenGLWidget):
     def handle_position_click(self, event):
         """Обработка клика для установки позиции"""
         # Упрощенная версия - требует доработки для точного позиционирования
-        x = event.position().x()
-        y = event.position().y()
+        x = event.localPos().x()
+        y = event.localPos().y()
 
         viewport = glGetIntegerv(GL_VIEWPORT)
         width = viewport[2]
@@ -630,7 +630,7 @@ class Advanced3DVisualizationWidget(QWidget):
         self.setLayout(main_layout)
 
         # Основной сплиттер
-        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter = QSplitter(Qt.Horizontal)
         main_layout.addWidget(splitter)
 
         # 3D визуализация
@@ -714,14 +714,14 @@ class Advanced3DVisualizationWidget(QWidget):
         layer_group.setLayout(layer_layout)
 
         # Слайдер слоев
-        self.layer_slider = QSlider(Qt.Orientation.Horizontal)
+        self.layer_slider = QSlider(Qt.Horizontal)
         self.layer_slider.setRange(0, 0)
         self.layer_slider.setValue(0)
         self.layer_slider.valueChanged.connect(self.visualization.set_current_layer)
 
         # Метка текущего слоя
         self.layer_label = QLabel(self.localization_manager.tr("view_3d_layer_group_layer_label")+"0 / 0")
-        self.layer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layer_label.setAlignment(Qt.AlignCenter)
 
         # Кнопки управления слоями
         layer_buttons_layout = QHBoxLayout()

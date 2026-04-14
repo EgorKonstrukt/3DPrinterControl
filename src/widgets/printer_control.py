@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from PyQt6.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
+from PyQt5.QtCore import pyqtSignal
 
 from widgets.connection_widget import ConnectionWidget
 from widgets.axis_control_widget import AxisControlWidget

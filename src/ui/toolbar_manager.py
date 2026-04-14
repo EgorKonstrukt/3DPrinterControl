@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QToolBar
-from PyQt6.QtGui import QAction
+from PyQt5.QtWidgets import QToolBar
+from PyQt5.QtGui import QAction
 
 class ToolbarManager:
     def __init__(self, main_window):

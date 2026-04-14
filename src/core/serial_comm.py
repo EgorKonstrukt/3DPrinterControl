@@ -3,7 +3,7 @@ import serial.tools.list_ports
 import threading
 import time
 import queue
-from PyQt6.QtCore import QObject, pyqtSignal, QTimer, QThread
+from PyQt5.QtCore import QObject, pyqtSignal, QTimer, QThread
 
 class SerialComm(QObject):
     data_received = pyqtSignal(str)

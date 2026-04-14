@@ -1,11 +1,11 @@
 import json
 import os
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, 
+from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, 
                              QLabel, QLineEdit, QTextEdit, QListWidget, 
                              QListWidgetItem, QGroupBox, QGridLayout,
                              QMessageBox, QInputDialog, QFileDialog)
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QFont
 
 class MacroDialog(QDialog):
     def __init__(self, gcode_handler, config_manager, parent=None):
@@ -195,7 +195,7 @@ class MacroDialog(QDialog):
     
     def add_macro(self):
         dialog = MacroEditDialog(self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
+        if dialog.exec_() == QDialog.Accepted:
             name, description, commands = dialog.get_macro_data()
             if name and name not in self.macros:
                 self.macros[name] = {
@@ -217,7 +217,7 @@ class MacroDialog(QDialog):
         macro = self.macros[name]
         
         dialog = MacroEditDialog(self, name, macro["description"], macro["commands"])
-        if dialog.exec() == QDialog.DialogCode.Accepted:
+        if dialog.exec_() == QDialog.Accepted:
             new_name, description, commands = dialog.get_macro_data()
             if new_name:
                 if new_name != name:
@@ -241,10 +241,10 @@ class MacroDialog(QDialog):
             self,
             "Подтверждение",
             f"Удалить макрос '{name}'?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            QMessageBox.Yes | QMessageBox.No
         )
         
-        if reply == QMessageBox.StandardButton.Yes:
+        if reply == QMessageBox.Yes:
             del self.macros[name]
             self.save_macros()
             self.update_macro_list()
@@ -267,10 +267,10 @@ class MacroDialog(QDialog):
             self,
             "Подтверждение",
             f"Выполнить макрос '{name}'?\n\nКоманды:\n" + "\n".join(commands),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            QMessageBox.Yes | QMessageBox.No
         )
         
-        if reply == QMessageBox.StandardButton.Yes:
+        if reply == QMessageBox.Yes:
             for command in commands:
                 if command.strip():
                     self.gcode_handler.send_command(command.strip())

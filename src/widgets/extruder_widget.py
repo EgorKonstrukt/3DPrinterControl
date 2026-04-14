@@ -1,7 +1,7 @@
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                              QLabel, QSpinBox, QDoubleSpinBox, QGroupBox, QGridLayout,
                              QSlider, QCheckBox)
-from PyQt6.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 
 class ExtruderWidget(QWidget):
@@ -49,7 +49,7 @@ class ExtruderWidget(QWidget):
         group = QGroupBox("Вентиляторы")
         layout = QGridLayout()
 
-        self.part_fan_slider = QSlider(Qt.Orientation.Horizontal)
+        self.part_fan_slider = QSlider(Qt.Horizontal)
         self.part_fan_slider.setRange(0, 255)
         self.part_fan_label = QLabel("0%")
 
