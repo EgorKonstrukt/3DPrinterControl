@@ -1,7 +1,7 @@
 import os
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QDockWidget, QMessageBox, QFileDialog, QApplication, QSplitter
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QDockWidget, QMessageBox, QFileDialog, QApplication, QSplitter, QAction
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QAction, QKeySequence
+from PyQt5.QtGui import QKeySequence
 
 from core.serial_comm import SerialComm
 from core.gcode_handler import GCodeHandler
