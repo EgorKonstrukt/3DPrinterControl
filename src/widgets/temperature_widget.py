@@ -180,14 +180,3 @@ class TemperatureWidget(QWidget):
         
         self.extruder_line.setData(extruder_xs, extruder_ys)
         self.bed_line.setData(bed_xs, bed_ys)
-
-        if self.extruder_data or self.bed_data:
-            all_temps = [temp for _, temp in self.extruder_data] + [temp for _, temp in self.bed_data]
-            if all_temps:
-                max_val = max(all_temps)
-                min_val = min(all_temps)
-                self.chart._vy0 = max(0, min_val - 10)
-                self.chart._vy1 = max_val + 10
-                self.chart._vx0 = 0
-                self.chart._vx1 = self.max_data_points
-                self.chart._canvas.update()

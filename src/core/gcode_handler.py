@@ -236,7 +236,7 @@ class GCodeHandler(QObject):
         """Парсинг ответа принтера"""
         response = response.strip()
 
-        temp_match = re.search(r'T:\s*(\d+\.?\d*)\s*/\s*(\d+\.?\d*)', response)
+        temp_match = re.search(r'T:\s*([\d.]+)\s*/\s*([\d.]+)', response)
         if temp_match:
             current_temp = float(temp_match.group(1))
             target_temp = float(temp_match.group(2))
@@ -244,7 +244,7 @@ class GCodeHandler(QObject):
             self.temperatures['extruder']['target'] = target_temp
             self.temperature_changed.emit('extruder', current_temp, target_temp)
 
-        bed_match = re.search(r'B:\s*(\d+\.?\d*)\s*/\s*(\d+\.?\d*)', response)
+        bed_match = re.search(r'B:\s*([\d.]+)\s*/\s*([\d.]+)', response)
         if bed_match:
             current_temp = float(bed_match.group(1))
             target_temp = float(bed_match.group(2))
@@ -252,7 +252,7 @@ class GCodeHandler(QObject):
             self.temperatures['bed']['target'] = target_temp
             self.temperature_changed.emit('bed', current_temp, target_temp)
 
-        pos_match = re.search(r'X:\s*(-?\d+\.?\d*)\s+Y:\s*(-?\d+\.?\d*)\s+Z:\s*(-?\d+\.?\d*)', response)
+        pos_match = re.search(r'X:\s*([\d.-]+)\s+Y:\s*([\d.-]+)\s+Z:\s*([\d.-]+)', response)
         if pos_match:
             x = float(pos_match.group(1))
             y = float(pos_match.group(2))
