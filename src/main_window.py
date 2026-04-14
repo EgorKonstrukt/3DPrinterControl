@@ -69,6 +69,14 @@ class MainWindow(QMainWindow):
         self._setup_dock_features(self.printer_control_dock)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.printer_control_dock)
 
+        self.temperature_dock = QDockWidget(self.localization_manager.tr("temperature_control"), self)
+        self.temperature_widget = TemperatureWidget(gcode_handler=self.gcode_handler,
+                                                    config_manager=self.config_manager,
+                                                    localization_manager=self.localization_manager)
+        self.temperature_dock.setWidget(self.temperature_widget)
+        self._setup_dock_features(self.temperature_dock)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.temperature_dock)
+
         self.gcode_dock = QDockWidget(self.localization_manager.tr("gcode_viewer"), self)
         self.gcode_widget = GCodeViewer(self.gcode_handler)
         self.gcode_dock.setWidget(self.gcode_widget)
@@ -121,6 +129,9 @@ class MainWindow(QMainWindow):
         )
         self.gcode_handler.temperature_changed.connect(
             self.status_manager.update_temperature_display
+        )
+        self.gcode_handler.temperature_changed.connect(
+            self.temperature_widget.update_temperatures
         )
         self.gcode_handler.print_status_changed.connect(
             self.status_manager.update_print_status
