@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                              QGroupBox, QGridLayout, QSpinBox, QCheckBox,
                              QTabWidget, QListWidget, QListWidgetItem,
                              QSplitter, QFrame, QSlider, QComboBox, QLayout,
-                             QAbstractScrollArea, QScrollBar, QTextEdit, QLineEdit)
+                             QAbstractScrollArea, QScrollBar, QLineEdit)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread, QMutex, QRect, QSize, QRegularExpression
 from PyQt5.QtGui import QFont, QTextCursor, QColor, QTextCharFormat, QSyntaxHighlighter, QPainter, \
     QTextFormat
@@ -277,7 +277,7 @@ class GCodeViewer(QWidget):
     def highlight_current_line(self):
         extra_selections = []
         if not self.gcode_text.isReadOnly():
-            selection = QTextEdit.ExtraSelection()
+            selection = QPlainTextEdit.ExtraSelection()
             line_color = QColor("#303030")
             selection.format.setBackground(line_color)
             selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)

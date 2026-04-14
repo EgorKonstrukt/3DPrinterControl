@@ -1,10 +1,7 @@
-from PyQt5.QtCore import QTimer
-from PyQt5.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
+from PyQt5.QtCore import QTimer, Qt
+from PyQt5Chart import QChart, QChartView, QLineSeries, QValueAxis
 from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-                             QLabel, QSlider, QCheckBox, QSpinBox, QGroupBox,
-                             QGridLayout, QFrame, QSplitter, QComboBox, QProgressBar, )
-from PyQt5.QtCore import Qt as QtWidgets
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider, QCheckBox, QSpinBox, QGroupBox, QGridLayout, QFrame, QSplitter, QComboBox, QProgressBar
 
 
 class TemperatureWidget(QWidget):
@@ -122,7 +119,7 @@ class TemperatureWidget(QWidget):
         axis_x = QValueAxis()
         axis_x.setLabelFormat("%i")
         axis_x.setTitleText(self.localization_manager.tr("temperature_chart_time"))
-        self.chart.addAxis(axis_x, QtWidgets.AlignmentFlag.AlignBottom)
+        self.chart.addAxis(axis_x, Qt.AlignBottom)
         self.extruder_series.attachAxis(axis_x)
         self.bed_series.attachAxis(axis_x)
 
@@ -130,7 +127,7 @@ class TemperatureWidget(QWidget):
         axis_y.setLabelFormat("%i °C")
         axis_y.setTitleText(self.localization_manager.tr("temperature_chart_temp"))
         axis_y.setRange(0, 300)
-        self.chart.addAxis(axis_y, QtWidgets.AlignmentFlag.AlignLeft)
+        self.chart.addAxis(axis_y, Qt.AlignLeft)
         self.extruder_series.attachAxis(axis_y)
         self.bed_series.attachAxis(axis_y)
 
@@ -203,5 +200,5 @@ class TemperatureWidget(QWidget):
         if self.extruder_data or self.bed_data:
             max_val = max(max(self.extruder_data) if self.extruder_data else 0, max(self.bed_data) if self.bed_data else 0)
             min_val = min(min(self.extruder_data) if self.extruder_data else 300, min(self.bed_data) if self.bed_data else 300)
-            self.chart.axes(QtWidgets.AlignmentFlag.AlignLeft)[0].setRange(min_val - 10, max_val + 10)
-            self.chart.axes(QtWidgets.AlignmentFlag.AlignBottom)[0].setRange(0, self.max_data_points)
+            self.chart.axes(Qt.AlignLeft)[0].setRange(min_val - 10, max_val + 10)
+            self.chart.axes(Qt.AlignBottom)[0].setRange(0, self.max_data_points)
