@@ -127,21 +127,26 @@ class MainWindow(QMainWindow):
         self.gcode_handler.position_changed.connect(
             self.status_manager.update_position_display
         )
+        self.gcode_handler.position_changed.connect(
+            self.printer_control_widget.update_position_from_gcode
+        )
+        self.gcode_handler.position_changed.connect(
+            self.visualization_3d.update_position
+        )
+
         self.gcode_handler.temperature_changed.connect(
             self.status_manager.update_temperature_display
         )
         self.gcode_handler.temperature_changed.connect(
             self.temperature_widget.update_temperatures
         )
+
         self.gcode_handler.print_status_changed.connect(
             self.status_manager.update_print_status
         )
 
         self.gcode_handler.gcode_loaded.connect(
             self.visualization_3d.load_gcode_path
-        )
-        self.gcode_handler.position_changed.connect(
-            self.visualization_3d.update_position
         )
 
         self.gcode_widget.layer_selected.connect(

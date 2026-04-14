@@ -239,6 +239,10 @@ class AxisControlWidget(QWidget):
         self.y_input.setValue(self.current_pos[1])
         self.z_input.setValue(self.current_pos[2])
 
+    def update_position_from_gcode(self, x, y, z):
+        self.current_pos = [x, y, z]
+        self.update_position_display()
+
     def update_position_from_3d(self, x, y, z):
         self.current_pos = [x, y, z]
         self.update_position_display()
