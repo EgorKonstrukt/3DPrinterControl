@@ -1,43 +1,5 @@
 ```
-# Compiled Python files
-*.pyc
-__pycache__/
-
-# Virtual environments
-venv/
-.venv/
-.env
-*.env
-*.env.*
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# Logs
-*.log
-
-# Build and distribution
-build/
-dist/
-*.egg-info/
-
-# Testing
-.coverage
-htmlcov/
-.coverage.*
-.tox/
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# MyPy cache
-.mypy_cache/
-
-# Pytest cache
-.pytest_cache/
+# Localization files are source code - don't ignore them
+# src/localization/en.json
+# src/localization/ru.json
 ```
