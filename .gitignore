@@ -10,6 +10,11 @@ venv/
 .env.local
 *.env.*
 
+# Build/dist directories
+build/
+dist/
+*.egg-info/
+
 # IDE files
 .vscode/
 .idea/
@@ -19,24 +24,16 @@ venv/
 # Logs
 *.log
 
+# Coverage reports
+.coverage
+htmlcov/
+coverage/
+
 # Temporary files
 *.tmp
+*.bak
 
-# Build artifacts
-build/
-dist/
-target/
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Python cache
-.mypy_cache/
-.pytest_cache/
-
-# System files
+# OS specific
 .DS_Store
 Thumbs.db
 ```

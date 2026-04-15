@@ -11,9 +11,10 @@ from PyQt5.QtGui import QFont, QTextCursor, QColor, QTextCharFormat, QPalette
 class AdvancedConsole(QWidget):
     command_sent = pyqtSignal(str)
     
-    def __init__(self, serial_comm):
+    def __init__(self, serial_comm, localization_manager):
         super().__init__()
         self.serial_comm = serial_comm
+        self.localization_manager = localization_manager
         self.command_history = []
         self.history_index = -1
         self.auto_scroll = True
@@ -48,15 +49,15 @@ class AdvancedConsole(QWidget):
         
         header_layout = QHBoxLayout()
         
-        self.connection_status = QLabel("Не подключен")
+        self.connection_status = QLabel(self.localization_manager.tr("console_not_connected"))
         self.connection_status.setStyleSheet("QLabel { color: red; font-weight: bold; }")
         
-        self.clear_btn = QPushButton("Очистить")
-        self.save_log_btn = QPushButton("Сохранить лог")
-        self.auto_scroll_checkbox = QCheckBox("Автопрокрутка")
+        self.clear_btn = QPushButton(self.localization_manager.tr("console_clear_btn"))
+        self.save_log_btn = QPushButton(self.localization_manager.tr("console_save_log_btn"))
+        self.auto_scroll_checkbox = QCheckBox(self.localization_manager.tr("console_auto_scroll_checkbox"))
         self.auto_scroll_checkbox.setChecked(True)
         
-        header_layout.addWidget(QLabel("Статус:"))
+        header_layout.addWidget(QLabel(self.localization_manager.tr("console_status_label")))
         header_layout.addWidget(self.connection_status)
         header_layout.addStretch()
         header_layout.addWidget(self.auto_scroll_checkbox)
@@ -83,12 +84,12 @@ class AdvancedConsole(QWidget):
         
         self.command_input = QLineEdit()
         self.command_input.setFont(QFont("Consolas", 10))
-        self.command_input.setPlaceholderText("Введите G-код команду...")
+        self.command_input.setPlaceholderText(self.localization_manager.tr("console_input_placeholder"))
         
-        self.send_btn = QPushButton("Отправить")
+        self.send_btn = QPushButton(self.localization_manager.tr("console_send_btn"))
         self.send_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")
         
-        input_layout.addWidget(QLabel("Команда:"))
+        input_layout.addWidget(QLabel(self.localization_manager.tr("console_command_label")))
         input_layout.addWidget(self.command_input)
         input_layout.addWidget(self.send_btn)
         
@@ -103,14 +104,14 @@ class AdvancedConsole(QWidget):
         widget = QWidget()
         layout = QHBoxLayout()
         
-        quick_commands_group = QGroupBox("Быстрые команды")
+        quick_commands_group = QGroupBox(self.localization_manager.tr("console_quick_commands_group"))
         quick_layout = QVBoxLayout()
         
         commands_row1 = QHBoxLayout()
-        self.m105_btn = QPushButton("M105 (Температура)")
-        self.m114_btn = QPushButton("M114 (Позиция)")
-        self.m119_btn = QPushButton("M119 (Концевики)")
-        self.m500_btn = QPushButton("M500 (Save to EEPROM)")
+        self.m105_btn = QPushButton(self.localization_manager.tr("console_m105_btn"))
+        self.m114_btn = QPushButton(self.localization_manager.tr("console_m114_btn"))
+        self.m119_btn = QPushButton(self.localization_manager.tr("console_m119_btn"))
+        self.m500_btn = QPushButton(self.localization_manager.tr("console_m500_btn"))
         self.m500_btn.setStyleSheet("QPushButton { background-color: #32a834; color: white; font-weight: bold; font-size: 14px; }")
         
         commands_row1.addWidget(self.m105_btn)
@@ -119,9 +120,9 @@ class AdvancedConsole(QWidget):
         commands_row1.addWidget(self.m500_btn)
         
         commands_row2 = QHBoxLayout()
-        self.g28_btn = QPushButton("G28 (Home)")
-        self.m84_btn = QPushButton("M84 (Отключить моторы)")
-        self.m112_btn = QPushButton("M112 (Аварийная остановка)")
+        self.g28_btn = QPushButton(self.localization_manager.tr("console_g28_btn"))
+        self.m84_btn = QPushButton(self.localization_manager.tr("console_m84_btn"))
+        self.m112_btn = QPushButton(self.localization_manager.tr("console_m112_btn"))
         self.m112_btn.setStyleSheet("QPushButton { background-color: #f44336; color: white; font-weight: bold; }")
         
         commands_row2.addWidget(self.g28_btn)
@@ -132,15 +133,15 @@ class AdvancedConsole(QWidget):
         quick_layout.addLayout(commands_row2)
         quick_commands_group.setLayout(quick_layout)
         
-        settings_group = QGroupBox("Настройки")
+        settings_group = QGroupBox(self.localization_manager.tr("console_settings_group"))
         settings_layout = QVBoxLayout()
         
-        self.log_checkbox = QCheckBox("Логирование в файл")
-        self.timestamp_checkbox = QCheckBox("Временные метки")
+        self.log_checkbox = QCheckBox(self.localization_manager.tr("console_logging_checkbox"))
+        self.timestamp_checkbox = QCheckBox(self.localization_manager.tr("console_timestamp_checkbox"))
         self.timestamp_checkbox.setChecked(True)
         
         max_lines_layout = QHBoxLayout()
-        max_lines_layout.addWidget(QLabel("Макс. строк:"))
+        max_lines_layout.addWidget(QLabel(self.localization_manager.tr("console_max_lines_label")))
         self.max_lines_spinbox = QSpinBox()
         self.max_lines_spinbox.setRange(100, 10000)
         self.max_lines_spinbox.setValue(1000)
@@ -152,12 +153,12 @@ class AdvancedConsole(QWidget):
         
         settings_group.setLayout(settings_layout)
         
-        filter_group = QGroupBox("Фильтры")
+        filter_group = QGroupBox(self.localization_manager.tr("console_filters_group"))
         filter_layout = QVBoxLayout()
         
-        self.filter_ok_checkbox = QCheckBox("Скрыть 'ok'")
-        self.filter_temp_checkbox = QCheckBox("Скрыть температуру")
-        self.filter_pos_checkbox = QCheckBox("Скрыть позицию")
+        self.filter_ok_checkbox = QCheckBox(self.localization_manager.tr("console_filter_ok_checkbox"))
+        self.filter_temp_checkbox = QCheckBox(self.localization_manager.tr("console_filter_temp_checkbox"))
+        self.filter_pos_checkbox = QCheckBox(self.localization_manager.tr("console_filter_pos_checkbox"))
         
         filter_layout.addWidget(self.filter_ok_checkbox)
         filter_layout.addWidget(self.filter_temp_checkbox)
@@ -417,14 +418,14 @@ class AdvancedConsole(QWidget):
         event.accept()
 
 class ConsoleWidget(QWidget):
-    def __init__(self, serial_comm):
+    def __init__(self, serial_comm, localization_manager):
         super().__init__()
-        self.init_ui(serial_comm)
+        self.init_ui(serial_comm, localization_manager)
     
-    def init_ui(self, serial_comm):
+    def init_ui(self, serial_comm, localization_manager):
         layout = QVBoxLayout()
         
-        self.console = AdvancedConsole(serial_comm)
+        self.console = AdvancedConsole(serial_comm, localization_manager)
         layout.addWidget(self.console)
         
         self.setLayout(layout)
