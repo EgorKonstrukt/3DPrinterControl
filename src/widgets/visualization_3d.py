@@ -733,19 +733,19 @@ class Advanced3DVisualizationWidget(QWidget):
         # Кнопки управления слоями
         layer_buttons_layout = QHBoxLayout()
 
-        self.prev_layer_btn = QPushButton("◀")
+        self.prev_layer_btn = QPushButton(self.localization_manager.tr("layer_prev_btn"))
         self.prev_layer_btn.setMaximumWidth(30)
         self.prev_layer_btn.clicked.connect(self.prev_layer)
 
-        self.next_layer_btn = QPushButton("▶")
+        self.next_layer_btn = QPushButton(self.localization_manager.tr("layer_next_btn"))
         self.next_layer_btn.setMaximumWidth(30)
         self.next_layer_btn.clicked.connect(self.next_layer)
 
-        self.first_layer_btn = QPushButton("⏮")
+        self.first_layer_btn = QPushButton(self.localization_manager.tr("layer_first_btn"))
         self.first_layer_btn.setMaximumWidth(30)
         self.first_layer_btn.clicked.connect(self.first_layer)
 
-        self.last_layer_btn = QPushButton("⏭")
+        self.last_layer_btn = QPushButton(self.localization_manager.tr("layer_last_btn"))
         self.last_layer_btn.setMaximumWidth(30)
         self.last_layer_btn.clicked.connect(self.last_layer)
 
@@ -762,7 +762,7 @@ class Advanced3DVisualizationWidget(QWidget):
         layout.addWidget(layer_group)
 
         # Группа управления камерой
-        camera_group = QGroupBox(self.localization_manager.tr(""))
+        camera_group = QGroupBox(self.localization_manager.tr("view_3d_camera_group_title"))
         camera_layout = QGridLayout()
         camera_group.setLayout(camera_layout)
 

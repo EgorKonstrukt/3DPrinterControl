@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
 
 
         self.console_dock = QDockWidget(self.localization_manager.tr("console"), self)
-        self.console_widget = ConsoleWidget(self.serial_comm)
+        self.console_widget = ConsoleWidget(self.serial_comm, self.localization_manager)
         self.console_dock.setWidget(self.console_widget)
         self._setup_dock_features(self.console_dock)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.console_dock)

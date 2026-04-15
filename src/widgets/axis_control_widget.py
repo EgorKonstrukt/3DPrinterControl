@@ -33,7 +33,7 @@ class AxisControlWidget(QWidget):
 
         self.step_buttons = []
         for i, step in enumerate(self.step_sizes):
-            btn = QPushButton(f"{step} мм")
+            btn = QPushButton(f"{step}{self.localization_manager.tr('axis_mm_suffix')}")
             btn.setCheckable(True)
             btn.clicked.connect(lambda checked, idx=i: self.set_step_size(idx))
             self.step_buttons.append(btn)
@@ -51,15 +51,16 @@ class AxisControlWidget(QWidget):
         self.y_pos_label = QLabel("0.00")
         self.z_pos_label = QLabel("0.00")
 
+        mm_suffix = self.localization_manager.tr("axis_mm_suffix")
         layout.addWidget(QLabel("X:"), 0, 0)
         layout.addWidget(self.x_pos_label, 0, 1)
-        layout.addWidget(QLabel("мм"), 0, 2)
+        layout.addWidget(QLabel(mm_suffix), 0, 2)
         layout.addWidget(QLabel("Y:"), 1, 0)
         layout.addWidget(self.y_pos_label, 1, 1)
-        layout.addWidget(QLabel("мм"), 1, 2)
+        layout.addWidget(QLabel(mm_suffix), 1, 2)
         layout.addWidget(QLabel("Z:"), 2, 0)
         layout.addWidget(self.z_pos_label, 2, 1)
-        layout.addWidget(QLabel("мм"), 2, 2)
+        layout.addWidget(QLabel(mm_suffix), 2, 2)
 
         group.setLayout(layout)
         return group
@@ -68,13 +69,13 @@ class AxisControlWidget(QWidget):
         group = QGroupBox(self.localization_manager.tr("control_axis"))
         layout = QGridLayout()
 
-        self.x_minus_btn = QPushButton("X-")
-        self.x_plus_btn = QPushButton("X+")
-        self.y_minus_btn = QPushButton("Y-")
-        self.y_plus_btn = QPushButton("Y+")
-        self.z_minus_btn = QPushButton("Z-")
-        self.z_plus_btn = QPushButton("Z+")
-        self.home_btn = QPushButton("HOME")
+        self.x_minus_btn = QPushButton(self.localization_manager.tr("btn_x_minus"))
+        self.x_plus_btn = QPushButton(self.localization_manager.tr("btn_x_plus"))
+        self.y_minus_btn = QPushButton(self.localization_manager.tr("btn_y_minus"))
+        self.y_plus_btn = QPushButton(self.localization_manager.tr("btn_y_plus"))
+        self.z_minus_btn = QPushButton(self.localization_manager.tr("btn_z_minus"))
+        self.z_plus_btn = QPushButton(self.localization_manager.tr("btn_z_plus"))
+        self.home_btn = QPushButton(self.localization_manager.tr("btn_home"))
 
         layout.addWidget(self.y_plus_btn, 0, 1)
         layout.addWidget(self.x_minus_btn, 1, 0)
@@ -94,7 +95,7 @@ class AxisControlWidget(QWidget):
         self.feedrate_spinbox = QSpinBox()
         self.feedrate_spinbox.setRange(1, 60000)
         self.feedrate_spinbox.setValue(self.current_feedrate)
-        self.feedrate_spinbox.setSuffix(" мм/мин")
+        self.feedrate_spinbox.setSuffix(self.localization_manager.tr("axis_speed_suffix"))
 
         layout.addWidget(self.feedrate_spinbox)
         group.setLayout(layout)
@@ -104,20 +105,22 @@ class AxisControlWidget(QWidget):
         group = QGroupBox(self.localization_manager.tr("control_manual_position"))
         layout = QGridLayout()
 
+        mm_suffix = self.localization_manager.tr("axis_mm_suffix")
+        
         self.x_input = QDoubleSpinBox()
         self.x_input.setRange(-1000, 1000)
         self.x_input.setDecimals(2)
-        self.x_input.setSuffix(" мм")
+        self.x_input.setSuffix(mm_suffix)
 
         self.y_input = QDoubleSpinBox()
         self.y_input.setRange(-1000, 1000)
         self.y_input.setDecimals(2)
-        self.y_input.setSuffix(" мм")
+        self.y_input.setSuffix(mm_suffix)
 
         self.z_input = QDoubleSpinBox()
         self.z_input.setRange(0, 500)
         self.z_input.setDecimals(2)
-        self.z_input.setSuffix(" мм")
+        self.z_input.setSuffix(mm_suffix)
 
         self.move_btn = QPushButton(self.localization_manager.tr("control_move"))
         self.move_btn.setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; }")

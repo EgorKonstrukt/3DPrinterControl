@@ -21,23 +21,23 @@ class ExtruderWidget(QWidget):
         self.setLayout(layout)
 
     def _create_extrude_group(self):
-        group = QGroupBox("Экструзия")
+        group = QGroupBox(self.localization_manager.tr("extruder_group"))
         layout = QGridLayout()
 
         self.extrude_length = QDoubleSpinBox()
         self.extrude_length.setRange(0.1, 100.0)
-        self.extrude_length.setSuffix(" мм")
+        self.extrude_length.setSuffix(self.localization_manager.tr("axis_mm_suffix"))
 
         self.extrude_speed = QSpinBox()
         self.extrude_speed.setRange(1, 1000)
-        self.extrude_speed.setSuffix(" мм/мин")
+        self.extrude_speed.setSuffix(self.localization_manager.tr("axis_speed_suffix"))
 
-        self.extrude_btn = QPushButton("Подать")
-        self.retract_btn = QPushButton("Втянуть")
+        self.extrude_btn = QPushButton(self.localization_manager.tr("extruder_extrude"))
+        self.retract_btn = QPushButton(self.localization_manager.tr("extruder_retract"))
 
-        layout.addWidget(QLabel("Длина:"), 0, 0)
+        layout.addWidget(QLabel(self.localization_manager.tr("extruder_length")), 0, 0)
         layout.addWidget(self.extrude_length, 0, 1)
-        layout.addWidget(QLabel("Скорость:"), 1, 0)
+        layout.addWidget(QLabel(self.localization_manager.tr("extruder_speed")), 1, 0)
         layout.addWidget(self.extrude_speed, 1, 1)
         layout.addWidget(self.extrude_btn, 2, 0)
         layout.addWidget(self.retract_btn, 2, 1)
@@ -46,16 +46,16 @@ class ExtruderWidget(QWidget):
         return group
 
     def _create_fan_group(self):
-        group = QGroupBox("Вентиляторы")
+        group = QGroupBox(self.localization_manager.tr("fan_group"))
         layout = QGridLayout()
 
         self.part_fan_slider = QSlider(Qt.Horizontal)
         self.part_fan_slider.setRange(0, 255)
         self.part_fan_label = QLabel("0%")
 
-        self.hotend_fan_checkbox = QCheckBox("Вентилятор хотенда")
+        self.hotend_fan_checkbox = QCheckBox(self.localization_manager.tr("fan_hotend_fan"))
 
-        layout.addWidget(QLabel("Обдув детали:"), 0, 0)
+        layout.addWidget(QLabel(self.localization_manager.tr("fan_part_cooling")), 0, 0)
         layout.addWidget(self.part_fan_slider, 0, 1)
         layout.addWidget(self.part_fan_label, 0, 2)
         layout.addWidget(self.hotend_fan_checkbox, 1, 0, 1, 3)
