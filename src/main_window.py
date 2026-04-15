@@ -115,6 +115,8 @@ class MainWindow(QMainWindow):
         self.toolbar_manager.create_toolbar()
         self.status_manager.create_status_bar()
 
+        self.installEventFilter(self)
+
     def _connect_signals(self):
         self.printer_control_widget.position_changed.connect(
             self.visualization_3d.update_position
@@ -272,7 +274,9 @@ class MainWindow(QMainWindow):
         self._apply_settings()
 
     def save_settings(self):
-        self.config_manager.save_layout(self.saveGeometry(), self.saveState())
+        geometry = self.saveGeometry()
+        state = self.saveState()
+        self.config_manager.save_layout(geometry, state)
         self.config_manager.save_config()
         self.status_manager.show_message(self.localization_manager.tr("message_settings_saved"))
 
@@ -302,3 +306,9 @@ class MainWindow(QMainWindow):
                 event.ignore()
         else:
             event.accept()
+
+    def eventFilter(self, obj, event):
+        from PyQt5.QtCore import QEvent
+        if event.type() == QEvent.LayoutRequest:
+            QTimer.singleShot(100, self.save_settings)
+        return super().eventFilter(obj, event)
